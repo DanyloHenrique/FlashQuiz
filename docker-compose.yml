@@ -1,0 +1,14 @@
+services:
+  postgres:
+    image: bitnami/postgresql:latest
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_USER=docker
+      - POSTGRES_PASSWORD=docker
+      - POSTGRES_DB=flashQuiz
+    volumes:
+      - flashQuiz_pg_data:/bitnami/postgresql
+
+volumes:
+  flashQuiz_pg_data:
