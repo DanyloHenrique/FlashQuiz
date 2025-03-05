@@ -1,0 +1,13 @@
+{
+    "compilerOptions": {
+      "target": "ES2020", // Configuração do alvo da transpilação
+      "module": "ESNext", // Usando módulos ES6
+      "moduleResolution": "Node",
+      "esModuleInterop": true,
+      "skipLibCheck": true,
+      "forceConsistentCasingInFileNames": true,
+      "strict": true,
+      "outDir": "./dist",
+      "allowJs": true
+    }
+}
