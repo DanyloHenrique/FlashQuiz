@@ -1,0 +1,36 @@
+{
+  "name": "flashquiz",
+  "version": "1.0.0",
+  "description": "Aplicação de flashcards para estudos",
+  "keywords": [
+    "node",
+    "flashcards",
+    "RESTful"
+  ],
+  "license": "ISC",
+  "author": "Danylo Henrique da Silva dos Santos",
+  "type": "commonjs",
+  "main": "src/server.ts",
+  "scripts": {
+    "start": "tsx watch src/server.ts",
+    "test": "npx jest"
+  },
+  "devDependencies": {
+    "@types/bcrypt": "^5.0.2",
+    "@types/jest": "^29.5.14",
+    "@types/node": "^22.13.9",
+    "jest": "^29.7.0",
+    "ts-jest": "^29.2.6",
+    "ts-node": "^10.9.2",
+    "tsx": "^4.19.3",
+    "typescript": "^5.8.2"
+  },
+  "dependencies": {
+    "@prisma/client": "^6.4.1",
+    "@types/express": "^5.0.0",
+    "bcrypt": "^5.1.1",
+    "express": "^4.21.2",
+    "uuidv4": "^6.2.13",
+    "zod": "^3.24.2"
+  }
+}
