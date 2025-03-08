@@ -4,6 +4,7 @@ import {
   getAllUsersUseCase,
   getUserByEmailUseCase,
   userCreateUseCase,
+  userDeleteUseCase,
   userLoginUseCase,
   userUpdateUseCase,
 } from "../../useCases/user/user-useCases";
