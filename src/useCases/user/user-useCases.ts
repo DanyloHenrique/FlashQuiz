@@ -1,6 +1,11 @@
 import bcrypt from "bcrypt";
 import Jwt from "jsonwebtoken";
-import { EmailAlreadyUsedError, EmailOrPasswordInvalidsError, NotFoundError, RequestDataMissingError } from "../../erros/errors";
+import {
+  EmailAlreadyUsedError,
+  EmailOrPasswordInvalidsError,
+  NotFoundError,
+  RequestDataMissingError,
+} from "../../erros/errors";
 
 import { User } from "../../domain/model/user.model";
 import { userRepository } from "../../repository/user-repository";
@@ -118,6 +123,16 @@ export async function userUpdateUseCase({
     if (!userUpdated) throw new NotFoundError();
 
     return userUpdated;
+  } catch (error) {
+    throw error;
+  }
+}
+
+export async function userDeleteUseCase(id: string) {
+  try {
+    const userDelete = await userRepository.delete({ id });
+    if (!userDelete) throw new NotFoundError();
+    return { user: userDelete };
   } catch (error) {
     throw error;
   }
