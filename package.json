@@ -19,7 +19,9 @@
     "@types/bcrypt": "^5.0.2",
     "@types/jest": "^29.5.14",
     "@types/node": "^22.13.9",
+    "@types/supertest": "^6.0.2",
     "jest": "^29.7.0",
+    "supertest": "^7.0.0",
     "ts-jest": "^29.2.6",
     "ts-node": "^10.9.2",
     "tsx": "^4.19.3",
@@ -28,8 +30,12 @@
   "dependencies": {
     "@prisma/client": "^6.4.1",
     "@types/express": "^5.0.0",
+    "@types/jsonwebtoken": "^9.0.9",
     "bcrypt": "^5.1.1",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.7",
     "express": "^4.21.2",
+    "jsonwebtoken": "^9.0.2",
     "uuidv4": "^6.2.13",
     "zod": "^3.24.2"
   }
