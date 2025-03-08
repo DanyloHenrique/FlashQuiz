@@ -4,6 +4,7 @@ import {
   getAllUsersUseCase,
   getUserByEmailUseCase,
   userCreateUseCase,
+  userLoginUseCase,
 } from "../../useCases/user/user-useCases";
 import { z } from "zod";
 
@@ -68,6 +69,27 @@ export const userController = {
       return response.status(200).json({
         message: "Todos os usuários encontrados!",
         data: usersList,
+      });
+    } catch (error) {
+      next(error);
+    }
+  },
+
+  async login(request: Request, response: Response, next: NextFunction) {
+    try {
+      const { email, password } = request.body;
+
+      userLoginSchema.parse({ email, password });
+
+      const userLoggedToken = await userLoginUseCase({ email, password });
+
+      if (!userLoggedToken) {
+        return response.status(401).json({ message: "Credenciais inválidas" });
+      }
+
+      return response.json({
+        message: "Login realizado com sucesso",
+        data: { userLoggedToken },
       });
     } catch (error) {
       next(error);
