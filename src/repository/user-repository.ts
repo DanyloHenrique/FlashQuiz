@@ -24,4 +24,14 @@ export const userRepository = {
     }
     return { users: users.map((user) => user.toObject()) }; // Retorna todos os usuários com a estrutura certa
   },
+
+  login({ email, password }: { email: string; password?: string }) {
+    const user = users.find((user) => user.getEmail() === email); // Busca pelo e-mail no array
+    if (!user) {
+      return null;
+    }
+    user.getPassword();
+
+    return { user: user.toObjectAndMethods() };
+  },
 };
