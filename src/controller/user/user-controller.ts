@@ -1,9 +1,10 @@
 import { Request, Response, NextFunction } from "express";
 
 import {
-  userCreateUseCase} from "../../useCases/user/user-useCases";
+  getUserByEmailUseCase,
+  userCreateUseCase,
+} from "../../useCases/user/user-useCases";
 import { z } from "zod";
-
 
 const UserSchema = z.object({
   name: z.string(),
@@ -35,4 +36,21 @@ export const userController = {
     }
   },
 
+  async getByEmail(request: Request, response: Response, next: NextFunction) {
+    try {
+      const { email } = request.body;
+      const emailSchema = z.string().email();
+
+      emailSchema.parse(email);
+
+      const userFounded = await getUserByEmailUseCase(email);
+
+      return response.status(200).json({
+        message: "Usuário encontrado",
+        data: userFounded,
+      });
+    } catch (error) {
+      next(error);
+    }
+  },
 };
