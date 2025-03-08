@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from "express";
 
 import {
+  getAllUsersUseCase,
   getUserByEmailUseCase,
   userCreateUseCase,
 } from "../../useCases/user/user-useCases";
@@ -48,6 +49,25 @@ export const userController = {
       return response.status(200).json({
         message: "Usuário encontrado",
         data: userFounded,
+      });
+    } catch (error) {
+      next(error);
+    }
+  },
+
+  async getAll(request: Request, response: Response, next: NextFunction) {
+    try {
+      const usersList = await getAllUsersUseCase();
+
+      if (!usersList) {
+        return response.status(204).json({
+          message: "Nenhum usuário encontrado",
+        });
+      }
+
+      return response.status(200).json({
+        message: "Todos os usuários encontrados!",
+        data: usersList,
       });
     } catch (error) {
       next(error);

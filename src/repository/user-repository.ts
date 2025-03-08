@@ -17,4 +17,11 @@ export const userRepository = {
     }
     return { user: user.toObject() };
   },
+
+  getAll() {
+    if (!users) {
+      return null;
+    }
+    return { users: users.map((user) => user.toObject()) }; // Retorna todos os usuários com a estrutura certa
+  },
 };

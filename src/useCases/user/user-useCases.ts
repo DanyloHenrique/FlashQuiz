@@ -38,3 +38,15 @@ export async function getUserByEmailUseCase(email: string) {
     throw error;
   }
 }
+
+export async function getAllUsersUseCase() {
+  try {
+    const usersList = userRepository.getAll();
+
+    if (!usersList) throw new NotFoundError();
+
+    return usersList;
+  } catch (error) {
+    throw error;
+  }
+}
