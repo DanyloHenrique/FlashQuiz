@@ -34,4 +34,32 @@ export const userRepository = {
 
     return { user: user.toObjectAndMethods() };
   },
+
+  update({
+    id,
+    userData,
+  }: {
+    id: string;
+    userData: { name?: string; email?: string; password?: string };
+  }) {
+    const user = users.find((user) => user.getId() === id); // Busca pelo e-mail no array
+
+    if (!user) {
+      return null;
+    }
+
+    if (userData.name !== undefined) {
+      user.setName(userData.name);
+    }
+
+    if (userData.email !== undefined) {
+      user.setEmail(userData.email);
+    }
+
+    if (userData.password !== undefined) {
+      user.setPassword(userData.password);
+    }
+
+    return { user: user.toObject() };
+  },
 };
