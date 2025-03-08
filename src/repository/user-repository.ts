@@ -62,4 +62,15 @@ export const userRepository = {
 
     return { user: user.toObject() };
   },
+
+  delete({ id }: { id: string }) {
+    const userIndexInUsers = users.findIndex((user) => user.getId() === id);
+
+    if (userIndexInUsers === -1) {
+      return null;
+    }
+
+    const deletedUser = users.splice(userIndexInUsers, 1)[0];
+    return { user: deletedUser.toObject() };
+  },
 };
