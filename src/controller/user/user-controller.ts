@@ -5,8 +5,12 @@ import {
   getUserByEmailUseCase,
   userCreateUseCase,
   userLoginUseCase,
+  userUpdateUseCase,
 } from "../../useCases/user/user-useCases";
 import { z } from "zod";
+import { NotLoggedError, NotPermissionError } from "../../erros/errors";
+import { UserDTO } from "../../domain/dto/user.model.DTO";
+import { AuthenticatedRequest } from "../../middleware/authenticateToken";
 
 const UserSchema = z.object({
   name: z.string(),
@@ -90,6 +94,42 @@ export const userController = {
       return response.json({
         message: "Login realizado com sucesso",
         data: { userLoggedToken },
+      });
+    } catch (error) {
+      next(error);
+    }
+  },
+
+  async update(
+    request: AuthenticatedRequest,
+    response: Response,
+    next: NextFunction,
+  ) {
+    try {
+      const { userIdToken } = request;
+      const { id } = request.params;
+      const userDataRequest = request.body
+      
+      if (!request.userIdToken) throw new NotLoggedError();
+      
+      //Verifica se id fornecido é o mesmo do usuário autenticado
+      if (id !== userIdToken) throw new NotPermissionError();
+      
+      //validações do id e dos dados do body
+      z.string().parse(id);
+
+      const validatedUserData = UserUpdateSchema.parse(userDataRequest); //pega os dados recebidos
+      
+      const user: Partial<UserDTO> = validatedUserData; //cria um user do tipo userDTO com atributos opcionais com os dados recebidos de validatedUserData
+
+      const userUpdated = await userUpdateUseCase({
+        id: id,
+        userData: user,
+      });
+
+      return response.status(200).json({
+        message: "Usuário atualizado com sucesso!",
+        data: userUpdated,
       });
     } catch (error) {
       next(error);

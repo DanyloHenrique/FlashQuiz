@@ -1,6 +1,6 @@
 import bcrypt from "bcrypt";
 import Jwt from "jsonwebtoken";
-import { EmailAlreadyUsedError, EmailOrPasswordInvalidsError, NotFoundError } from "../../erros/errors";
+import { EmailAlreadyUsedError, EmailOrPasswordInvalidsError, NotFoundError, RequestDataMissingError } from "../../erros/errors";
 
 import { User } from "../../domain/model/user.model";
 import { userRepository } from "../../repository/user-repository";
@@ -92,6 +92,32 @@ export async function userLoginUseCase({
     console.log("🚀 user-UseCase ~ token:", token);
 
     return { token: token };
+  } catch (error) {
+    throw error;
+  }
+}
+
+//partial para tornar as propriedades como opcionais
+export async function userUpdateUseCase({
+  id,
+  userData,
+}: {
+  id: string;
+  userData: Partial<UserDTO>;
+}) {
+  try {
+    const { name, email, password } = userData;
+
+    if (!name && !email && !password) throw new RequestDataMissingError();
+
+    const userUpdated = await userRepository.update({
+      id: id,
+      userData: { name, email, password },
+    });
+
+    if (!userUpdated) throw new NotFoundError();
+
+    return userUpdated;
   } catch (error) {
     throw error;
   }
