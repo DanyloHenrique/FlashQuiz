@@ -22,7 +22,7 @@ export const userRepository = {
     const foundedUser = users.find((user) => user.getId() === id); // Busca pelo e-mail no array
     if(!foundedUser) return null
     return {data: foundedUser}
-  }
+  },
 
   getAll() {
     if (!users) {
