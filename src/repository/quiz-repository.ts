@@ -1,4 +1,3 @@
-import { QuizDTO } from "../domain/dto/quiz.model.DTO";
 import { Quiz } from "../domain/model/quiz.model";
 
 const quizzes: Quiz[] = [];

@@ -18,6 +18,12 @@ export const userRepository = {
     return { user: user.toObject() };
   },
 
+  getById(id: string){
+    const foundedUser = users.find((user) => user.getId() === id); // Busca pelo e-mail no array
+    if(!foundedUser) return null
+    return {data: foundedUser}
+  },
+
   getAll() {
     if (!users) {
       return null;
