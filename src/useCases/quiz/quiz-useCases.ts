@@ -5,16 +5,17 @@ import { RequestDataMissingError } from "../../erros/errors";
 import { quizRepository } from "../../repository/quiz-repository";
 
 export const quizUseCase = {
-  create({ userId, title, description, visibility, flashCard }: QuizDTO) {
+  create({ userId, title, description, visibility, flashcardList }: QuizDTO) {
+    console.log("🚀 ~ create ~ flashcardList:", flashcardList)
     try {
       if (!userId || !title) throw new RequestDataMissingError();
-      
+
       const quizObj = new Quiz({
         userId,
         title,
         description,
         visibility,
-        flashCard,
+        flashcardList,
       });
       console.log("🚀 ~ create ~ quizObj:", quizObj);
 

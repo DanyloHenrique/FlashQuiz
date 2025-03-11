@@ -15,9 +15,9 @@ const flashCardSchema = z.object({
 
 const quizSchema = z.object({
   title: z.string(),
-  description: z.string(),
+  description: z.string().optional(),
   visibility: z.enum([Visibility.PUBLIC, Visibility.PRIVATE]),
-  flashcard: z.optional(z.array(flashCardSchema)),
+  flashcardList: z.array(flashCardSchema).optional(),
 });
 
 export const quizController = {
@@ -28,18 +28,18 @@ export const quizController = {
   ) {
     try {
       const userId = request.userIdToken;
-      const { title, description, visibility, flashCard } = request.body;
+      const { title, description, visibility, flashcardList } = request.body;
 
       if (!userId) throw new Error();
 
-      quizSchema.parse({ title, description, visibility, flashCard });
+      quizSchema.parse({ title, description, visibility, flashcardList });
 
       const createdQuiz = await quizUseCase.create({
         userId,
         title,
         description,
-        visibility,
-        flashCard,
+        visibility, 
+        flashcardList: flashcardList ?? [],
       });
 
       if (!createdQuiz) throw new NotFoundError();

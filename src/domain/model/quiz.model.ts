@@ -1,6 +1,7 @@
 import { uuid } from "uuidv4";
 import { Flashcard } from "./flashcard.model";
 import { QuizDTO } from "../dto/quiz.model.DTO";
+import { FlashcardDTO } from "../dto/flashcard.model.DTO";
 
 export enum Visibility {
   PUBLIC = "public",
@@ -8,7 +9,7 @@ export enum Visibility {
 }
 
 export class Quiz {
-  private flashcard: Flashcard[] = [];
+  private flashcardList: Flashcard[] = [];
   readonly id: string;
   readonly userId: string;
   private title: string;
@@ -17,22 +18,30 @@ export class Quiz {
     Visibility.PUBLIC;
   readonly create_at: Date;
 
-  constructor({ userId, title, description, visibility }: QuizDTO) {
+  constructor({ userId, title, description, visibility, flashcardList }: QuizDTO) {
     this.userId = userId;
     this.id = uuid();
     this.title = title;
     this.description = description;
     this.create_at = new Date();
     this.visibility = visibility;
+    if (flashcardList) {
+      this.flashcardList = flashcardList.map((flashcard) => new Flashcard(flashcard));
+    }
   }
-
-  addFlashcard(flashcard: Flashcard) {
-    this.flashcard.push(flashcard);
-  }
-
   public toObject() {
     const { create_at, ...QuizWithoutDate } = this;
-    return QuizWithoutDate;
+    return {
+      QuizWithoutDate,
+      addFlashcard: (flashcard: Flashcard) => this.addFlashcard(flashcard),
+    };
+  }
+
+  public addFlashcard(flashcard: FlashcardDTO) {
+    const newFlashcardObj = new Flashcard(flashcard)
+    if (newFlashcardObj) {
+      this.flashcardList.push(newFlashcardObj);
+    }
   }
 
   public getUserId() {
