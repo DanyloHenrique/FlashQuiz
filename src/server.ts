@@ -1,6 +1,7 @@
 const express = require("express");
 import { errorHandler } from "./middleware/errorHandler";
 import userRoutes from "./routes/user-routes";
+import quizRouter from "./routes/quiz-routes";
 var cors = require("cors");
 require("dotenv").config();
 
@@ -17,7 +18,8 @@ app.use(cors(corsOption));
 
 //chamando as rotas
 app.use(userRoutes);
-app.use(errorHandler)
+app.use(quizRouter);
+app.use(errorHandler);
 
 const port = 3000;
 app.listen(port, () => {
