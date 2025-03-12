@@ -1,15 +1,24 @@
 import { Router, Request, Response, NextFunction } from "express";
 import authenticateToken, {
-    AuthenticatedRequest,
-  } from "../middleware/authenticateToken";
+  AuthenticatedRequest,
+} from "../middleware/authenticateToken";
 import { quizController } from "../controller/quiz/quiz-controller";
-  
 
+const router = Router();
 
-const router = Router()
+router.post(
+  "/quiz",
+  authenticateToken,
+  (request: Request, response: Response, next: NextFunction) => {
+    quizController.create(request, response, next);
+  },
+);
 
-router.post("/quiz", authenticateToken, (request: Request, response: Response, next: NextFunction)=>{
-    quizController.create(request, response, next)
-});
-
-export default router
+router.get(
+  "/quiz/user",
+  authenticateToken,
+  (request: Request, response: Response, next: NextFunction) => {
+    quizController.getAllFromUser(request, response, next);
+  },
+);
+export default router;

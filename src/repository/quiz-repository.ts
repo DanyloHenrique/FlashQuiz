@@ -9,9 +9,15 @@ export const quizRepository = {
     console.log("🚀 ~ create ~ quiz:", quiz);
     return { quiz: quiz.toObject() };
   },
-  findAll() {
-    return { data: quizzes };
+
+  findAllFromUser(userId: string) {
+    const quizListFromUser = quizzes.filter((quiz) => userId == quiz.userId);
+
+    if (!quizListFromUser) return null;
+
+    return { data: quizListFromUser };
   },
+
   findById(id: string) {
     // return {data: foundedQuiz.toObject()}
   },
