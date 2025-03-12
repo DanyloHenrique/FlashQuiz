@@ -6,7 +6,7 @@ import { AuthenticatedRequest } from "../../middleware/authenticateToken";
 import { quizUseCase } from "../../useCases/quiz/quiz-useCases";
 import { Visibility } from "../../domain/model/quiz.model";
 import { Flashcard } from "../../domain/model/flashcard.model";
-import { NotFoundError } from "../../erros/errors";
+import { NotFoundError, NotLoggedError } from "../../erros/errors";
 
 const flashCardSchema = z.object({
   term: z.string(),
@@ -14,7 +14,7 @@ const flashCardSchema = z.object({
 });
 
 const quizSchema = z.object({
-  title: z.string(),
+  title: z.string().min(3),
   description: z.string().optional(),
   visibility: z.enum([Visibility.PUBLIC, Visibility.PRIVATE]),
   flashcardList: z.array(flashCardSchema).optional(),
@@ -38,7 +38,7 @@ export const quizController = {
         userId,
         title,
         description,
-        visibility, 
+        visibility,
         flashcardList: flashcardList ?? [],
       });
 
@@ -49,6 +49,32 @@ export const quizController = {
         sucess: true,
         data: createdQuiz,
         message: "Quiz criado com sucesso!",
+      });
+    } catch (error) {
+      console.error("quiz-controller.ts", " :: Error ❌ : ", error);
+      next(error);
+    }
+  },
+
+  async getAllFromUser(
+    request: AuthenticatedRequest,
+    response: Response,
+    next: NextFunction,
+  ) {
+    try {
+      const userIdToken = request.userIdToken;
+      if (!userIdToken) throw new NotLoggedError();
+
+      const findedAllQuizFromUser = await quizUseCase.findAllFromUser(
+        userIdToken,
+      );
+
+      if (!findedAllQuizFromUser) throw new NotFoundError();
+
+      return response.status(200).json({
+        sucess: true,
+        data: findedAllQuizFromUser,
+        message: "lista de Quiz do usuário",
       });
     } catch (error) {
       console.error("quiz-controller.ts", " :: Error ❌ : ", error);
