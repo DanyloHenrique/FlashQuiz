@@ -21,8 +21,12 @@ export const quizUseCase = {
         visibility,
         flashcardList,
       });
+      console.log("🚀 ~ quizObj:", quizObj)
+      console.log("🚀 ~ quizObj.getFlashcardList():",  quizObj.getFlashcardList())
+
 
       const createdQuiz = await quizRepository.create(quizObj);
+      console.log("🚀 ~ createdQuiz:", createdQuiz)
 
       if (!createdQuiz) throw new Error();
 
@@ -78,12 +82,15 @@ export const quizUseCase = {
       if (!title && !description && !visibility)
         throw new RequestDataMissingError();
 
+      const FoundQuizCurrentById = await quizRepository.findById(quizId);
+      if (!FoundQuizCurrentById) throw new NotFoundError("quiz");
+
       const updatedQuiz = await quizRepository.update({
-        quizId: quizId,
+        dataCurrentQuiz: FoundQuizCurrentById.quiz,
         dataToUpdateQuiz: { title, description, visibility },
       });
 
-      if (!updatedQuiz) throw new NotFoundError("quiz");
+      if (!updatedQuiz) throw new Error();
 
       return updatedQuiz;
     } catch (error) {

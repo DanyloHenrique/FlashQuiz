@@ -13,18 +13,19 @@ export const quizRepository = {
   findAllFromUser(userId: string) {
     const quizListFromUser = quizzes.filter((quiz) => userId == quiz.userId);
 
-    if (!quizListFromUser) return null;
+    if (quizListFromUser.length === 0) return null;
 
-    return { quiz: quizListFromUser };
+    return { quiz: quizListFromUser.map((quiz) => quiz.toObject()) };
   },
 
   findAllPublicQuiz() {
     const quizListPublic = quizzes.filter(
       (quiz) => Visibility.PUBLIC === quiz.getVisibility(),
     );
-    if (!quizListPublic) return null;
 
-    return { quiz: quizListPublic };
+    if (quizListPublic.length === 0) return null;
+
+    return { quiz: quizListPublic.map((quiz) => quiz.toObject()) };
   },
 
   findById(quizId: String) {
@@ -32,33 +33,31 @@ export const quizRepository = {
 
     if (!foundQuizById) return null;
 
-    return { quiz: foundQuizById.toObject() };
+    return { quiz: foundQuizById };
   },
 
   update({
-    quizId,
+    dataCurrentQuiz,
     dataToUpdateQuiz,
   }: {
-    quizId: string;
+    dataCurrentQuiz: Quiz;
     dataToUpdateQuiz: Partial<QuizDTO>;
   }) {
-    const foundQuizById = quizzes.find((quiz) => quiz.id === quizId);
-
-    if (!foundQuizById) return null;
+    if (!dataCurrentQuiz || !dataToUpdateQuiz) return null;
 
     if (dataToUpdateQuiz.title !== undefined) {
-      foundQuizById.setTitle(dataToUpdateQuiz.title);
+      dataCurrentQuiz.setTitle(dataToUpdateQuiz.title);
     }
 
     if (dataToUpdateQuiz.description !== undefined) {
-      foundQuizById.setDescription(dataToUpdateQuiz.description);
+      dataCurrentQuiz.setDescription(dataToUpdateQuiz.description);
     }
 
     if (dataToUpdateQuiz.visibility !== undefined) {
-      foundQuizById.setVisibility(dataToUpdateQuiz.visibility);
+      dataCurrentQuiz.setVisibility(dataToUpdateQuiz.visibility);
     }
 
-    return { quiz: foundQuizById.toObject() };
+    return { quiz: dataCurrentQuiz.toObject() };
   },
 
   delete(quizId: string) {
