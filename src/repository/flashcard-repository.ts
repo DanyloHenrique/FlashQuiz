@@ -21,6 +21,24 @@ export const flashcardRepository = {
       flashcardCurrentData.setDescription(flashcardToUpdateData.description);
     }
 
-    return { quiz: flashcardCurrentData.toObject() };
+    return { flashcard: flashcardCurrentData.toObject() };
+  },
+
+  delete({
+    flashcardId,
+    flashcardList,
+  }: {
+    flashcardId: string;
+    flashcardList: Flashcard[];
+  }) {
+    const flashcardIndexInList = flashcardList.findIndex(
+      (flashcard) => flashcard.id === flashcardId,
+    );
+
+    if (flashcardIndexInList === -1) return null;
+
+    const deletedFlashcard = flashcardList.splice(flashcardIndexInList, 1)[0];
+
+    return { flashcard: deletedFlashcard.toObject() };
   },
 };
