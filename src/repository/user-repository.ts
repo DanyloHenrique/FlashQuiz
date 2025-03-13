@@ -12,15 +12,18 @@ export const userRepository = {
 
   getByEmail(email: string) {
     const foundUserByEmail = users.find((user) => user.getEmail() === email); // Busca pelo e-mail no array
+
     if (!foundUserByEmail) {
       return null;
     }
-    return { user: foundUserByEmail.toObject() };
+    return { user: foundUserByEmail };
   },
 
   getById(id: string) {
     const foundUser = users.find((user) => user.getId() === id); // Busca pelo e-mail no array
+
     if (!foundUser) return null;
+
     return { user: foundUser };
   },
 
@@ -31,40 +34,28 @@ export const userRepository = {
     return { users: users.map((user) => user.toObject()) }; // Retorna todos os usuários
   },
 
-  login({ email, password }: { email: string; password?: string }) {
-    const user = users.find((user) => user.getEmail() === email); // Busca pelo e-mail no array
-
-    if (!user) {
-      return null;
-    }
-
-    return { user: user.toObjectAndMethods() };
-  },
-
   update({
-    id,
-    userData,
+    userCurrentData,
+    userUpdateData,
   }: {
-    id: string;
-    userData: { name?: string; email?: string; password?: string };
+    userCurrentData: User;
+    userUpdateData: { name?: string; email?: string; password?: string };
   }) {
-    const user = users.find((user) => user.getId() === id); // Busca pelo e-mail no array
+    if (!userCurrentData) return null;
 
-    if (!user) return null;
-
-    if (userData.name !== undefined) {
-      user.setName(userData.name);
+    if (userUpdateData.name !== undefined) {
+      userCurrentData.setName(userUpdateData.name);
     }
 
-    if (userData.email !== undefined) {
-      user.setEmail(userData.email);
+    if (userUpdateData.email !== undefined) {
+      userCurrentData.setEmail(userUpdateData.email);
     }
 
-    if (userData.password !== undefined) {
-      user.setPassword(userData.password);
+    if (userUpdateData.password !== undefined) {
+      userCurrentData.setPassword(userUpdateData.password);
     }
 
-    return { user: user.toObject() };
+    return { user: userCurrentData.toObject() };
   },
 
   delete({ id }: { id: string }) {
