@@ -8,7 +8,7 @@ export class User {
   private name: string;
   private email: string;
   private password: string;
-  private quiz: Quiz[] = []
+  private quiz: Quiz[] = [];
   readonly date_at: Date;
 
   constructor({ name, email, password }: UserDTO) {
@@ -21,23 +21,35 @@ export class User {
     this.date_at = new Date();
   }
 
-  addQuiz(quizParam: Quiz){
-    return this.quiz.push(quizParam)
+  addQuiz(quizParam: Quiz) {
+    return this.quiz.push(quizParam);
   }
 
   public toObject() {
-    const { password, date_at, ...userWithoutPasswordAndDate } = this;
-    return {userWithoutPasswordAndDate}
+    return {
+      id: this.id,
+      name: this.name,
+      email: this.email,
+    };
   }
 
   public toObjectAndMethods() {
     const { date_at, ...userWithoutDate } = this;
-    return {userWithoutDate, getEmail: this.getEmail(), getName: this.getName(), getPassword: this.getPassword(), getId: this.getId()}
+    return {
+      userWithoutDate,
+      getEmail: this.getEmail(),
+      getName: this.getName(),
+      getPassword: this.getPassword(),
+      getId: this.getId(),
+    };
   }
 
-    public static async comparePassword(providedPassword: string, storedPasswordHash: string): Promise<boolean> {
-      return await bcrypt.compare(providedPassword, storedPasswordHash);
-    }
+  public static async comparePassword(
+    providedPassword: string,
+    storedPasswordHash: string,
+  ): Promise<boolean> {
+    return await bcrypt.compare(providedPassword, storedPasswordHash);
+  }
 
   public getName() {
     return this.name;
@@ -45,7 +57,7 @@ export class User {
   public getEmail() {
     return this.email;
   }
-  public getPassword() :string {
+  public getPassword(): string {
     return this.password;
   }
 
