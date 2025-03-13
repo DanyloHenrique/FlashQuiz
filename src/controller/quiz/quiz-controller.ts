@@ -1,31 +1,11 @@
-import { Request, Response, NextFunction } from "express";
-
+import { Response, NextFunction } from "express";
 import { z } from "zod";
 
 import { AuthenticatedRequest } from "../../middleware/authenticateToken";
-import { quizUseCase } from "../../useCases/quiz/quiz-useCases";
-import { Visibility } from "../../domain/model/quiz.model";
-import { Flashcard } from "../../domain/model/flashcard.model";
 import { NotFoundError, NotLoggedError } from "../../erros/errors";
+import { quizUseCase } from "../../useCases/quiz/quiz-useCases";
 import { QuizDTO } from "../../domain/dto/quiz.model.DTO";
-
-const flashCardSchema = z.object({
-  term: z.string(),
-  description: z.string(),
-});
-
-const quizSchema = z.object({
-  title: z.string().min(3),
-  description: z.string().optional(),
-  visibility: z.enum([Visibility.PUBLIC, Visibility.PRIVATE]),
-  flashcardList: z.array(flashCardSchema).optional(),
-});
-
-const quizUpdateSchame = z.object({
-  title: z.string().optional(),
-  description: z.string().optional(),
-  visibility: z.enum([Visibility.PUBLIC, Visibility.PRIVATE]).optional(),
-});
+import { quizSchema, quizUpdateSchame } from "../../schemas/quiz.schema";
 
 export const quizController = {
   async create(
@@ -37,7 +17,7 @@ export const quizController = {
       const userId = request.userIdToken;
       const { title, description, visibility, flashcardList } = request.body;
 
-      if (!userId) throw new Error();
+      if (!userId) throw new NotLoggedError()
 
       quizSchema.parse({ title, description, visibility, flashcardList });
 
@@ -161,8 +141,8 @@ export const quizController = {
       const quizPartial: Partial<QuizDTO> = validatedQuizDate;
 
       const userUpdated = await quizUseCase.update({
-        id: id,
-        quizData: quizPartial,
+        quizId: id,
+        dataToUpdateQuiz: quizPartial,
       });
 
       if (!userUpdated) throw new Error();

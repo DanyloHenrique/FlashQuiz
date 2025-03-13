@@ -7,7 +7,6 @@ export const quizRepository = {
   create(quiz: Quiz) {
     quizzes.push(quiz);
 
-    console.log("🚀 ~ create ~ quiz:", quiz);
     return { quiz: quiz.toObject() };
   },
 
@@ -16,7 +15,7 @@ export const quizRepository = {
 
     if (!quizListFromUser) return null;
 
-    return { data: quizListFromUser };
+    return { quiz: quizListFromUser };
   },
 
   findAllPublicQuiz() {
@@ -25,7 +24,7 @@ export const quizRepository = {
     );
     if (!quizListPublic) return null;
 
-    return { data: quizListPublic };
+    return { quiz: quizListPublic };
   },
 
   findById(quizId: String) {
@@ -33,35 +32,39 @@ export const quizRepository = {
 
     if (!foundQuizById) return null;
 
-    return { data: foundQuizById.toObject() };
+    return { quiz: foundQuizById.toObject() };
   },
-  update({ id, quizData }: { id: string; quizData: Partial<QuizDTO> }) {
-    const quiz = quizzes.find((quiz) => quiz.id === id); // Busca pelo e-mail no array
 
-    if (!quiz) {
-      return null;
+  update({
+    quizId,
+    dataToUpdateQuiz,
+  }: {
+    quizId: string;
+    dataToUpdateQuiz: Partial<QuizDTO>;
+  }) {
+    const foundQuizById = quizzes.find((quiz) => quiz.id === quizId);
+
+    if (!foundQuizById) return null;
+
+    if (dataToUpdateQuiz.title !== undefined) {
+      foundQuizById.setTitle(dataToUpdateQuiz.title);
     }
 
-    if (quizData.title !== undefined) {
-      quiz.setTitle(quizData.title);
+    if (dataToUpdateQuiz.description !== undefined) {
+      foundQuizById.setDescription(dataToUpdateQuiz.description);
     }
 
-    if (quizData.description !== undefined) {
-      quiz.setDescription(quizData.description);
+    if (dataToUpdateQuiz.visibility !== undefined) {
+      foundQuizById.setVisibility(dataToUpdateQuiz.visibility);
     }
 
-    if (quizData.visibility !== undefined) {
-      quiz.setVisibility(quizData.visibility);
-    }
-
-    return { quiz: quiz.toObject() };
+    return { quiz: foundQuizById.toObject() };
   },
+
   delete(quizId: string) {
     const quizIndexInQuizzes = quizzes.findIndex((quiz) => quiz.id === quizId);
 
-    if (quizIndexInQuizzes === -1) {
-      return null;
-    }
+    if (quizIndexInQuizzes === -1) return null;
 
     const deletedQuiz = quizzes.splice(quizIndexInQuizzes, 1)[0];
     return { quiz: deletedQuiz.toObject() };

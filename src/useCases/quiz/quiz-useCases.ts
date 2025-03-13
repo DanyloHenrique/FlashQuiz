@@ -1,12 +1,16 @@
 import { QuizDTO } from "../../domain/dto/quiz.model.DTO";
-import { Flashcard } from "../../domain/model/flashcard.model";
 import { Quiz } from "../../domain/model/quiz.model";
 import { NotFoundError, RequestDataMissingError } from "../../erros/errors";
 import { quizRepository } from "../../repository/quiz-repository";
 
 export const quizUseCase = {
-  create({ userId, title, description, visibility, flashcardList }: QuizDTO) {
-    console.log("🚀 ~ create ~ flashcardList:", flashcardList);
+  async create({
+    userId,
+    title,
+    description,
+    visibility,
+    flashcardList,
+  }: QuizDTO) {
     try {
       if (!userId || !title) throw new RequestDataMissingError();
 
@@ -17,10 +21,8 @@ export const quizUseCase = {
         visibility,
         flashcardList,
       });
-      console.log("🚀 ~ create ~ quizObj:", quizObj);
 
-      const createdQuiz = quizRepository.create(quizObj);
-      console.log("🚀 ~ create ~ createdQuiz:", createdQuiz);
+      const createdQuiz = await quizRepository.create(quizObj);
 
       if (!createdQuiz) throw new Error();
 
@@ -35,7 +37,7 @@ export const quizUseCase = {
 
     const findedAllQuizFromUser = await quizRepository.findAllFromUser(userId);
 
-    if (!findedAllQuizFromUser) throw new NotFoundError();
+    if (!findedAllQuizFromUser) throw new NotFoundError("quiz");
 
     return findedAllQuizFromUser;
   },
@@ -63,21 +65,27 @@ export const quizUseCase = {
     }
   },
 
-  async update({ id, quizData }: { id: string; quizData: Partial<QuizDTO> }) {
+  async update({
+    quizId,
+    dataToUpdateQuiz,
+  }: {
+    quizId: string;
+    dataToUpdateQuiz: Partial<QuizDTO>;
+  }) {
     try {
-      const { title, description, visibility } = quizData;
+      const { title, description, visibility } = dataToUpdateQuiz;
 
       if (!title && !description && !visibility)
         throw new RequestDataMissingError();
 
-      const quizUpdated = await quizRepository.update({
-        id: id,
-        quizData: { title, description, visibility },
+      const updatedQuiz = await quizRepository.update({
+        quizId: quizId,
+        dataToUpdateQuiz: { title, description, visibility },
       });
 
-      if (!quizUpdated) throw new NotFoundError();
+      if (!updatedQuiz) throw new NotFoundError("quiz");
 
-      return quizUpdated;
+      return updatedQuiz;
     } catch (error) {
       throw error;
     }
