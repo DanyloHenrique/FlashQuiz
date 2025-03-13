@@ -106,9 +106,15 @@ export const userUseCase = {
     dataToUpdateUser: Partial<UserDTO>;
   }) {
     try {
-      const { name, email, password } = dataToUpdateUser;
+      const { name, email } = dataToUpdateUser;
+      let { password } = dataToUpdateUser;
 
       if (!name && !email && !password) throw new RequestDataMissingError();
+
+      //criptografa a senha se ela existir
+      if (password) {
+        password = await bcrypt.hash(password, 10);
+      }
 
       const userUpdated = await userRepository.update({
         id: id,
