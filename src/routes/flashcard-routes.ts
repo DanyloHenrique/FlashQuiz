@@ -14,4 +14,12 @@ router.put(
   },
 );
 
+router.delete(
+    "/quiz/:quizId/flashcard/:flashcardId",
+    authenticateToken,
+    (request: AuthenticatedRequest, response: Response, next: NextFunction) => {
+      flashcardController.delete(request, response, next);
+    },
+  );
+
 export default router;

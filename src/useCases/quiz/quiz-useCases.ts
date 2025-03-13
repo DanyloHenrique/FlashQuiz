@@ -23,14 +23,8 @@ export const quizUseCase = {
         visibility,
         flashcardList,
       });
-      console.log("🚀 ~ quizObj:", quizObj);
-      console.log(
-        "🚀 ~ quizObj.getFlashcardList():",
-        quizObj.getFlashcardList(),
-      );
 
       const createdQuiz = await quizRepository.create(quizObj);
-      console.log("🚀 ~ createdQuiz:", createdQuiz);
 
       if (!createdQuiz) throw new Error();
 
@@ -161,10 +155,11 @@ export const quizUseCase = {
       const foundQuizById = await quizRepository.findById(quizId);
       if (!foundQuizById) throw new NotFoundError("quiz");
 
-      const createdQuizFlashcard = await quizRepository.addMultipleFlashcardToQuiz({
-        quizObj: foundQuizById.quiz,
-        newsFlashcard: flashcardList,
-      });
+      const createdQuizFlashcard =
+        await quizRepository.addMultipleFlashcardToQuiz({
+          quizObj: foundQuizById.quiz,
+          newsFlashcard: flashcardList,
+        });
 
       if (!createdQuizFlashcard) throw new NotFoundError("quiz");
 

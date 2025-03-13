@@ -50,4 +50,40 @@ export const flashcardController = {
       next(error);
     }
   },
+
+  async delete(
+    request: AuthenticatedRequest,
+    response: Response,
+    next: NextFunction,
+  ) {
+    try {
+      const userIdToken = request.userIdToken;
+      const { quizId, flashcardId } = request.params;
+      if (!userIdToken) throw new NotLoggedError();
+
+      const idSchema = z.string();
+      idSchema.parse(quizId);
+      idSchema.parse(flashcardId);
+
+      const flashcardDeleted = await flashcardUseCase.delete({
+        quizId: quizId,
+        flashcardId: flashcardId,
+      });
+
+      if (!flashcardDeleted) throw new Error();
+
+      return response.status(200).json({
+        sucess: true,
+        data: flashcardDeleted,
+        message: "Flashcard deletado com sucesso",
+      });
+    } catch (error) {
+      console.error(
+        "flashcard-controller.ts - delete",
+        " :: Error ❌ : ",
+        error,
+      );
+      next(error);
+    }
+  },
 };
