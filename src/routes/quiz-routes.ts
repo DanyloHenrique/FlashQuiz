@@ -38,6 +38,14 @@ router.get(
   },
 );
 
+router.put(
+  "/quiz/:id",
+  authenticateToken,
+  (request: Request, response: Response, next: NextFunction) => {
+    quizController.update(request, response, next);
+  },
+);
+
 router.delete(
   "/quiz/:id",
   authenticateToken,
