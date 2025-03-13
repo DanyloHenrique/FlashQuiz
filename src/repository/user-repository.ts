@@ -18,10 +18,10 @@ export const userRepository = {
     return { user: foundUserByEmail.toObject() };
   },
 
-  getById(id: string){
+  getById(id: string) {
     const foundUser = users.find((user) => user.getId() === id); // Busca pelo e-mail no array
-    if(!foundUser) return null
-    return {user: foundUser}
+    if (!foundUser) return null;
+    return { user: foundUser };
   },
 
   getAll() {
@@ -33,10 +33,10 @@ export const userRepository = {
 
   login({ email, password }: { email: string; password?: string }) {
     const user = users.find((user) => user.getEmail() === email); // Busca pelo e-mail no array
+
     if (!user) {
       return null;
     }
-    user.getPassword();
 
     return { user: user.toObjectAndMethods() };
   },

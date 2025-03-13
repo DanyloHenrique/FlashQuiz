@@ -112,6 +112,8 @@ export const userController = {
 
       const validatedUserData = UserUpdateSchema.parse(userDataRequest); //pega os dados recebidos
       const user: Partial<UserDTO> = validatedUserData; //cria um user do tipo userDTO com atributos opcionais com os dados recebidos de validatedUserData
+      console.log("🚀 ~ validatedUserData:", validatedUserData);
+      console.log("🚀 ~ user:", user);
 
       const userUpdated = await userUseCase.update({
         id: id,

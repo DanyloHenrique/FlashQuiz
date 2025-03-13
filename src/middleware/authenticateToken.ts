@@ -1,5 +1,6 @@
 import { NextFunction, Request, Response } from "express";
 import Jwt, { JwtPayload } from "jsonwebtoken";
+import { verifyToken } from "../utils/authUtils";
 
 require("dotenv").config(); // Carrega as variáveis do .env
 
@@ -31,10 +32,11 @@ export default async function authenticateToken(
   }
 
   try {
-    const decoded = Jwt.verify(token, SECRET) as TokenPayload;
+    const decoded = verifyToken(token);
+    if (!decoded) throw new Error();
 
     request.userIdToken = decoded.userId; // Acessa o userId
-    request.headers["authorization"] = token
+    request.headers["authorization"] = token;
 
     next(); // Continua para o próximo middleware
   } catch (err) {

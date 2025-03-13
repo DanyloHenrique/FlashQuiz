@@ -10,6 +10,7 @@ import {
 import { User } from "../../domain/model/user.model";
 import { userRepository } from "../../repository/user-repository";
 import { UserDTO } from "../../domain/dto/user.model.DTO";
+import { generateToken } from "../../utils/authUtils";
 
 require("dotenv").config(); // Carrega as variáveis do .env
 const SECRET = process.env.SECRET;
@@ -68,13 +69,7 @@ export const userUseCase = {
     }
   },
 
-  async Login({
-    email,
-    password,
-  }: {
-    email: string;
-    password: string;
-  }) {
+  async Login({ email, password }: { email: string; password: string }) {
     try {
       if (!email || !password) throw new RequestDataMissingError();
       if (!SECRET) throw new Error();
@@ -89,14 +84,10 @@ export const userUseCase = {
 
       if (!isPasswordValid) throw new EmailOrPasswordInvalidsError();
 
-      const token = Jwt.sign(
-        {
-          userId: userFoundedByEmail.user.getId,
-          userEmail: userFoundedByEmail.user.getEmail,
-          userName: userFoundedByEmail.user.getName,
-        },
-        SECRET,
-        { expiresIn: 60 * 60 }, //1h
+      const token = generateToken(
+        userFoundedByEmail.user.getId,
+        userFoundedByEmail.user.getEmail,
+        userFoundedByEmail.user.getName,
       );
 
       console.log("🚀 user-UseCase ~ token:", token);
@@ -116,16 +107,16 @@ export const userUseCase = {
   }) {
     try {
       const { name, email, password } = dataToUpdateUser;
-  
+
       if (!name && !email && !password) throw new RequestDataMissingError();
-  
+
       const userUpdated = await userRepository.update({
         id: id,
         userData: { name, email, password },
       });
-  
+
       if (!userUpdated) throw new NotFoundError();
-  
+
       return userUpdated;
     } catch (error) {
       throw error;
@@ -134,15 +125,14 @@ export const userUseCase = {
 
   async delete(id: string) {
     try {
-      if(!id) throw new RequestDataMissingError()
+      if (!id) throw new RequestDataMissingError();
 
       const userDelete = await userRepository.delete({ id });
       if (!userDelete) throw new NotFoundError();
-      
+
       return { user: userDelete };
     } catch (error) {
       throw error;
     }
-  }
+  },
 };
-
