@@ -11,24 +11,24 @@ export const userRepository = {
   },
 
   getByEmail(email: string) {
-    const user = users.find((user) => user.getEmail() === email); // Busca pelo e-mail no array
-    if (!user) {
+    const foundUserByEmail = users.find((user) => user.getEmail() === email); // Busca pelo e-mail no array
+    if (!foundUserByEmail) {
       return null;
     }
-    return { user: user.toObject() };
+    return { user: foundUserByEmail.toObject() };
   },
 
   getById(id: string){
-    const foundedUser = users.find((user) => user.getId() === id); // Busca pelo e-mail no array
-    if(!foundedUser) return null
-    return {data: foundedUser}
+    const foundUser = users.find((user) => user.getId() === id); // Busca pelo e-mail no array
+    if(!foundUser) return null
+    return {user: foundUser}
   },
 
   getAll() {
     if (!users) {
       return null;
     }
-    return { users: users.map((user) => user.toObject()) }; // Retorna todos os usuários com a estrutura certa
+    return { users: users.map((user) => user.toObject()) }; // Retorna todos os usuários
   },
 
   login({ email, password }: { email: string; password?: string }) {
@@ -50,9 +50,7 @@ export const userRepository = {
   }) {
     const user = users.find((user) => user.getId() === id); // Busca pelo e-mail no array
 
-    if (!user) {
-      return null;
-    }
+    if (!user) return null;
 
     if (userData.name !== undefined) {
       user.setName(userData.name);

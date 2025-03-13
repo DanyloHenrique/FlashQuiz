@@ -1,17 +1,15 @@
 import { Request, Response, NextFunction } from "express";
 
-import {
-  getAllUsersUseCase,
-  getUserByEmailUseCase,
-  userCreateUseCase,
-  userDeleteUseCase,
-  userLoginUseCase,
-  userUpdateUseCase,
-} from "../../useCases/user/user-useCases";
+import { userUseCase } from "../../useCases/user/user-useCases";
 import { z } from "zod";
-import { NotLoggedError, NotPermissionError } from "../../erros/errors";
+import {
+  NotFoundError,
+  NotLoggedError,
+  NotPermissionError,
+} from "../../erros/errors";
 import { UserDTO } from "../../domain/dto/user.model.DTO";
 import { AuthenticatedRequest } from "../../middleware/authenticateToken";
+import { error } from "console";
 
 const UserSchema = z.object({
   name: z.string(),
@@ -32,11 +30,13 @@ export const userController = {
       //validação com zod
       UserSchema.parse({ name, email, password });
 
-      const userCreated = await userCreateUseCase({ name, email, password });
+      const userCreated = await userUseCase.create({ name, email, password });
+      if (!userCreated) throw new Error();
 
       return response.status(201).json({
-        message: "Usuário criado com sucesso!",
+        succes: true,
         data: userCreated,
+        message: "Usuário criado com sucesso!",
       });
     } catch (error) {
       next(error);
@@ -47,14 +47,15 @@ export const userController = {
     try {
       const { email } = request.body;
       const emailSchema = z.string().email();
-
       emailSchema.parse(email);
 
-      const userFounded = await getUserByEmailUseCase(email);
+      const foundUserByEmail = await userUseCase.getByEmail(email);
+      if (!foundUserByEmail) throw new NotFoundError();
 
       return response.status(200).json({
+        succes: true,
+        data: foundUserByEmail,
         message: "Usuário encontrado",
-        data: userFounded,
       });
     } catch (error) {
       next(error);
@@ -63,13 +64,8 @@ export const userController = {
 
   async getAll(request: Request, response: Response, next: NextFunction) {
     try {
-      const usersList = await getAllUsersUseCase();
-
-      if (!usersList) {
-        return response.status(204).json({
-          message: "Nenhum usuário encontrado",
-        });
-      }
+      const usersList = await userUseCase.getAll();
+      if (!usersList) throw new NotFoundError();
 
       return response.status(200).json({
         message: "Todos os usuários encontrados!",
@@ -83,18 +79,15 @@ export const userController = {
   async login(request: Request, response: Response, next: NextFunction) {
     try {
       const { email, password } = request.body;
-
       userLoginSchema.parse({ email, password });
 
-      const userLoggedToken = await userLoginUseCase({ email, password });
+      const userLoggedToken = await userUseCase.Login({ email, password });
+      if (!userLoggedToken) throw new Error("Credenciais inválidas");
 
-      if (!userLoggedToken) {
-        return response.status(401).json({ message: "Credenciais inválidas" });
-      }
-
-      return response.json({
-        message: "Login realizado com sucesso",
+      return response.status(200).json({
+        succes: true,
         data: { userLoggedToken },
+        message: "Login realizado com sucesso",
       });
     } catch (error) {
       next(error);
@@ -115,20 +108,19 @@ export const userController = {
 
       //Verifica se id fornecido é o mesmo do usuário autenticado
       if (id !== userIdToken) throw new NotPermissionError();
-
-      //validações do id e dos dados do body
-      z.string().parse(id);
+      z.string().parse(id); //validações do id
 
       const validatedUserData = UserUpdateSchema.parse(userDataRequest); //pega os dados recebidos
-
       const user: Partial<UserDTO> = validatedUserData; //cria um user do tipo userDTO com atributos opcionais com os dados recebidos de validatedUserData
 
-      const userUpdated = await userUpdateUseCase({
+      const userUpdated = await userUseCase.update({
         id: id,
-        userData: user,
+        dataToUpdateUser: user,
       });
+      if (!userUpdated) throw new Error();
 
       return response.status(200).json({
+        succes: true,
         message: "Usuário atualizado com sucesso!",
         data: userUpdated,
       });
@@ -150,15 +142,15 @@ export const userController = {
 
       //Verifica se id fornecido é o mesmo do usuário autenticado
       if (id !== userIdToken) throw new NotPermissionError();
-
-      //validações do id
       z.string().parse(id);
 
-      const userDeleted = await userDeleteUseCase(id);
+      const userDeleted = await userUseCase.delete(id);
+      if (!userDeleted) throw new Error();
 
       return response.status(200).json({
-        message: "Usuário deletado com sucesso!",
+        succes: true,
         data: userDeleted,
+        message: "Usuário deletado com sucesso!",
       });
     } catch (error) {
       next(error);
