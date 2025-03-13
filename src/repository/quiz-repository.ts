@@ -1,4 +1,6 @@
+import { FlashcardDTO } from "../domain/dto/flashcard.model.DTO";
 import { QuizDTO } from "../domain/dto/quiz.model.DTO";
+import { Flashcard } from "../domain/model/flashcard.model";
 import { Quiz, Visibility } from "../domain/model/quiz.model";
 
 const quizzes: Quiz[] = [];
@@ -67,5 +69,19 @@ export const quizRepository = {
 
     const deletedQuiz = quizzes.splice(quizIndexInQuizzes, 1)[0];
     return { quiz: deletedQuiz.toObject() };
+  },
+
+  async addFlashcardToQuiz({
+    quizObj,
+    newFlashcard,
+  }: {
+    quizObj: Quiz;
+    newFlashcard: FlashcardDTO;
+  }) {
+    if (!quizObj || !newFlashcard) return null;
+
+    quizObj.addFlashcard(newFlashcard);
+
+    return { quiz: quizObj.toObject(true) };
   },
 };

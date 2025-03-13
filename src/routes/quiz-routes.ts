@@ -54,4 +54,12 @@ router.delete(
   },
 );
 
+router.post(
+  "/quiz/:id",
+  authenticateToken,
+  (request: Request, response: Response, next: NextFunction) => {
+    quizController.addFlashcardToQuiz(request, response, next);
+  },
+);
+
 export default router;

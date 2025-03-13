@@ -1,3 +1,5 @@
+import { error } from "console";
+import { FlashcardDTO } from "../../domain/dto/flashcard.model.DTO";
 import { QuizDTO } from "../../domain/dto/quiz.model.DTO";
 import { Quiz } from "../../domain/model/quiz.model";
 import { NotFoundError, RequestDataMissingError } from "../../erros/errors";
@@ -21,12 +23,14 @@ export const quizUseCase = {
         visibility,
         flashcardList,
       });
-      console.log("🚀 ~ quizObj:", quizObj)
-      console.log("🚀 ~ quizObj.getFlashcardList():",  quizObj.getFlashcardList())
-
+      console.log("🚀 ~ quizObj:", quizObj);
+      console.log(
+        "🚀 ~ quizObj.getFlashcardList():",
+        quizObj.getFlashcardList(),
+      );
 
       const createdQuiz = await quizRepository.create(quizObj);
-      console.log("🚀 ~ createdQuiz:", createdQuiz)
+      console.log("🚀 ~ createdQuiz:", createdQuiz);
 
       if (!createdQuiz) throw new Error();
 
@@ -113,5 +117,29 @@ export const quizUseCase = {
       console.error("quiz-useCases.ts", " :: Error ❌ : ", error);
       throw error;
     }
+  },
+
+  async addFlashcardToQuiz({
+    quizId,
+    flashcard,
+  }: {
+    quizId: String;
+    flashcard: FlashcardDTO;
+  }) {
+    if (!quizId || !flashcard) throw new RequestDataMissingError();
+    console.log("🚀 ~ quizId:", quizId);
+    console.log("🚀 ~ flashcard:", flashcard);
+
+    const foundQuizById = await quizRepository.findById(quizId);
+    if (!foundQuizById) throw new NotFoundError("quiz");
+
+    const createdFlashcard = await quizRepository.addFlashcardToQuiz({
+      quizObj: foundQuizById.quiz,
+      newFlashcard: flashcard,
+    });
+
+    if (!createdFlashcard) throw new NotFoundError("quiz");
+
+    return createdFlashcard;
   },
 };
