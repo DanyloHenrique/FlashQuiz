@@ -29,4 +29,13 @@ router.get(
     quizController.getAllPublic(request, response, next);
   },
 );
+
+router.get(
+  "/quiz/:id",
+  authenticateToken,
+  (request: Request, response: Response, next: NextFunction) => {
+    quizController.getById(request, response, next);
+  },
+);
+
 export default router;

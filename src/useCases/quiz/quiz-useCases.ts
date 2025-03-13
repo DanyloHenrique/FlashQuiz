@@ -47,4 +47,19 @@ export const quizUseCase = {
 
     return findedAllQuizFromUser;
   },
+
+  async findById(quizId: String) {
+    try {
+      if (!quizId) throw new RequestDataMissingError();
+
+      const foundQuizById = await quizRepository.findById(quizId);
+
+      if (!foundQuizById) throw new NotFoundError("quiz");
+
+      return foundQuizById;
+    } catch (error) {
+      console.error("quiz-useCases.ts - findById", " :: Error ❌ : ", error);
+      throw error;
+    }
+  },
 };

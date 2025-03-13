@@ -27,8 +27,12 @@ export const quizRepository = {
     return { data: quizListPublic };
   },
 
-  findById(id: string) {
-    // return {data: foundedQuiz.toObject()}
+  findById(quizId: String) {
+    const foundQuizById = quizzes.find((quiz) => quiz.id === quizId)
+
+    if(!foundQuizById) return null
+
+     return {data: foundQuizById.toObject()}
   },
   update(quiz: Quiz) {
     // return {data: updatedQuiz}

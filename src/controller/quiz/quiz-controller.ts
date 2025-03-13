@@ -105,4 +105,33 @@ export const quizController = {
       next(error);
     }
   },
+
+  async getById(
+    request: AuthenticatedRequest,
+    response: Response,
+    next: NextFunction,
+  ) {
+    try {
+      const userIdToken = request.userIdToken;
+      if (!userIdToken) throw new NotLoggedError();
+
+      const { id } = request.params;
+      const idSchema = z.string();
+
+      idSchema.parse(id);
+
+      const foundQuizById = await quizUseCase.findById(id);
+
+      if (!foundQuizById) throw new NotFoundError('quiz');
+
+      return response.status(200).json({
+        sucess: true,
+        data: foundQuizById,
+        message: "Quiz buscado com sucesso",
+      });
+    } catch (error) {
+      console.error("quiz-controller.ts - findById", " :: Error ❌ : ", error);
+      next(error);
+    }
+  },
 };
