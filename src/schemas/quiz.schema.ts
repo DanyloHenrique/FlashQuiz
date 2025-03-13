@@ -19,4 +19,10 @@ const quizUpdateSchame = z.object({
   visibility: z.enum([Visibility.PUBLIC, Visibility.PRIVATE]).optional(),
 });
 
-export { quizSchema, quizUpdateSchame, flashcardSchema };
+const arrayFlashcardList = z.object({
+  flashcardList: z
+    .array(flashcardSchema)
+    .min(1, { message: "é necessário pelo menos 1 flashcard" }),
+});
+
+export { quizSchema, quizUpdateSchame, flashcardSchema, arrayFlashcardList };
