@@ -38,4 +38,12 @@ router.get(
   },
 );
 
+router.delete(
+  "/quiz/:id",
+  authenticateToken,
+  (request: Request, response: Response, next: NextFunction) => {
+    quizController.delete(request, response, next);
+  },
+);
+
 export default router;

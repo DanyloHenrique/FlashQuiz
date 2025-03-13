@@ -37,7 +37,14 @@ export const quizRepository = {
   update(quiz: Quiz) {
     // return {data: updatedQuiz}
   },
-  delete(id: string) {
-    // return {data: deletedQuiz}
+  delete(quizId: string) {
+    const quizIndexInQuizzes = quizzes.findIndex((quiz) => quiz.id === quizId);
+
+    if (quizIndexInQuizzes === -1) {
+      return null;
+    }
+
+    const deletedQuiz = quizzes.splice(quizIndexInQuizzes, 1)[0];
+    return { quiz: deletedQuiz.toObject() };
   },
 };
