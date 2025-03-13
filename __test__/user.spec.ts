@@ -1,32 +1,15 @@
-import bcrypt from "bcrypt";
-
-import { UserDTO } from "../src/domain/dto/user.model.DTO";
-import {
-  userCreateUseCase,
-  getUserByEmailUseCase,
-  getAllUsersUseCase,
-  userUpdateUseCase,
-  userDeleteUseCase,
-  userLoginUseCase,
-} from "../src/useCases/user/user-useCases";
+import { userUseCase } from "../src/useCases/user/user-useCases";
 import { userRepository } from "../src/repository/user-repository";
 import { User } from "../src/domain/model/user.model";
-import { object } from "zod";
+import { userObj, userTest } from "./user-test";
 
 jest.mock("uuidv4", () => ({
   uuid: jest.fn(() => "fake-id"), // Mockando o ID para sempre retornar 'fake-id'
 }));
 
-const userTest: UserDTO = {
-  name: "Danylo",
-  email: "danylohenriique@gmail.com",
-  password: "1234",
-};
-const userObj = new User(userTest);
-
 describe("create user", () => {
   it("useCases", async () => {
-    const user = await userCreateUseCase(userTest);
+    const user = await userUseCase.create(userTest);
     expect(user).toMatchObject({ user: userObj.toObject() });
   });
 
@@ -38,7 +21,7 @@ describe("create user", () => {
 
 describe("find user by email", () => {
   it("useCases", async () => {
-    const userFounded = await getUserByEmailUseCase(userTest.email);
+    const userFounded = await userUseCase.getByEmail(userTest.email);
     expect(userFounded).toMatchObject({ user: userObj.toObject() });
   });
 
@@ -57,7 +40,7 @@ describe("find user by email", () => {
 
 describe("get all users", () => {
   it("useCase", async () => {
-    const usersList = await getAllUsersUseCase();
+    const usersList = await userUseCase.getAll();
 
     if (usersList && "users" in usersList) {
       expect(usersList).toHaveProperty("users");
@@ -78,7 +61,7 @@ describe("create user with invalid data", () => {
   it("useCases", async () => {
     const invalidUserData = { name: "", email: "invalid", password: "123" };
     try {
-      await userCreateUseCase(invalidUserData);
+      await userUseCase.create(invalidUserData);
     } catch (error) {
       if (error instanceof Error) {
         expect(error.message).toBe("Email inválido");
@@ -92,8 +75,7 @@ describe("login user", () => {
     const email = userObj.getEmail();
     const password = userObj.getPassword();
 
-    // const user = await userCreateUseCase(userTest);
-    const userLoggedToken = await userLoginUseCase({ email, password });
+    const userLoggedToken = await userUseCase.Login({ email, password });
     expect(userLoggedToken);
   });
 
@@ -102,8 +84,6 @@ describe("login user", () => {
     const password = userObj.getPassword();
 
     const user = await userRepository.login({ email });
-    // Verifica se o usuário foi encontrado
-    console.log("🚀 ~ it ~ user:", user);
     expect(user).toBeDefined();
   });
 });
@@ -113,9 +93,9 @@ describe("update user", () => {
     const name = "emily";
 
     console.log("🚀 ~ it ~ userObj -update Usecases:", userObj.toObject());
-    const userUpdated = await userUpdateUseCase({
+    const userUpdated = await userUseCase.update({
       id: userObj.id,
-      userData: { name },
+      dataToUpdateUser: { name },
     });
 
     userObj.setName(name);
@@ -157,19 +137,15 @@ describe("delete user", () => {
     if (!usersList) return;
 
     const userListLengthBeforeDeleting = usersList.users.length;
-    // console.log("🚀 ~ it ~ userListLengthBeforeDeleting (antes do delete):", userListLengthBeforeDeleting)
 
-    const deletedUser = await userDeleteUseCase(userObj.id);
+    const deletedUser = await userUseCase.delete(userObj.id);
 
     usersList = await userRepository.getAll();
     if (!usersList) return;
     const userListLengthAfterDeleting = usersList.users.length;
 
-    // console.log("🚀 ~ it ~ userListLengthAfterDeleting (depois do delete):", userListLengthAfterDeleting)
-
     if (!usersList) return;
 
-    //tamanho da lista depois é igual a tamanho da lista anterior - 1
     expect(userListLengthAfterDeleting).toBe(userListLengthBeforeDeleting - 1);
   });
 
@@ -178,7 +154,6 @@ describe("delete user", () => {
     if (!usersList) return;
 
     const userListLengthBeforeDeleting = usersList.users.length;
-    // console.log("🚀 ~ it ~ userListLengthBeforeDeleting (antes do delete):", userListLengthBeforeDeleting)
 
     const deletedUser = await userRepository.delete({
       id: userObj.id,
@@ -187,8 +162,6 @@ describe("delete user", () => {
     usersList = await userRepository.getAll();
     if (!usersList) return;
     const userListLengthAfterDeleting = usersList.users.length;
-
-    // console.log("🚀 ~ it ~ userListLengthAfterDeleting (depois do delete):", userListLengthAfterDeleting)
 
     if (!usersList) return;
 
