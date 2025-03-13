@@ -62,4 +62,21 @@ export const quizUseCase = {
       throw error;
     }
   },
+
+  async delete(quizId: string) {
+    try {
+      if (!quizId) throw new RequestDataMissingError();
+
+      const foundQuizById = await quizRepository.findById(quizId);
+      if (!foundQuizById) throw new NotFoundError("quiz");
+
+      const deletedQuiz = await quizRepository.delete(quizId);
+      if(!deletedQuiz) throw new Error()
+
+      return deletedQuiz;
+    } catch (error) {
+      console.error("quiz-useCases.ts", " :: Error ❌ : ", error);
+      throw error
+    }
+  },
 };

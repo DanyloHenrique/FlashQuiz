@@ -134,4 +134,32 @@ export const quizController = {
       next(error);
     }
   },
+
+  async delete(
+    request: AuthenticatedRequest,
+    response: Response,
+    next: NextFunction,
+  ) {
+    try {
+      const userIdToken = request.userIdToken;
+      if (!userIdToken) throw new NotLoggedError();
+
+      const { id } = request.params;
+      const idSchema = z.string();
+      idSchema.parse(id);
+
+      const deletedQuiz = await quizUseCase.delete(id);
+
+      if (!deletedQuiz) throw new Error();
+
+      return response.status(200).json({
+        sucess: true,
+        data: deletedQuiz,
+        message: "Quiz deletado com sucesso",
+      });
+    } catch (error) {
+      console.error("quiz-controller.ts - delete", " :: Error ❌ : ", error);
+      next(error);
+    }
+  },
 };
