@@ -24,8 +24,15 @@ export class RequestDataMissingError extends AppError {
 }
 
 export class NotFoundError extends AppError {
-  constructor() {
-    super("Usuário não encontrado", HttpStatus.NOT_FOUND);
+  constructor(entity?: string) {
+    console.log("🚀 ~ NotFoundError ~ constructor ~ entity:", entity);
+    let message: string;
+    if (entity !== undefined) {
+      message = `${entity} não encontrado`;
+    } else {
+      message = `dado não encontrado`;
+    }
+    super(message, HttpStatus.NOT_FOUND);
   }
 }
 
@@ -43,7 +50,10 @@ export class EmailOrPasswordInvalidsError extends AppError {
 
 export class NotPermissionError extends AppError {
   constructor() {
-    super(`Você não tem permissão para atualizar este usuário!`, HttpStatus.FORBIDDEN);
+    super(
+      `Você não tem permissão para atualizar este usuário!`,
+      HttpStatus.FORBIDDEN,
+    );
   }
 }
 
