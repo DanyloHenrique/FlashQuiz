@@ -63,6 +63,26 @@ export const quizUseCase = {
     }
   },
 
+  async update({ id, quizData }: { id: string; quizData: Partial<QuizDTO> }) {
+    try {
+      const { title, description, visibility } = quizData;
+
+      if (!title && !description && !visibility)
+        throw new RequestDataMissingError();
+
+      const quizUpdated = await quizRepository.update({
+        id: id,
+        quizData: { title, description, visibility },
+      });
+
+      if (!quizUpdated) throw new NotFoundError();
+
+      return quizUpdated;
+    } catch (error) {
+      throw error;
+    }
+  },
+
   async delete(quizId: string) {
     try {
       if (!quizId) throw new RequestDataMissingError();
@@ -71,12 +91,12 @@ export const quizUseCase = {
       if (!foundQuizById) throw new NotFoundError("quiz");
 
       const deletedQuiz = await quizRepository.delete(quizId);
-      if(!deletedQuiz) throw new Error()
+      if (!deletedQuiz) throw new Error();
 
       return deletedQuiz;
     } catch (error) {
       console.error("quiz-useCases.ts", " :: Error ❌ : ", error);
-      throw error
+      throw error;
     }
   },
 };

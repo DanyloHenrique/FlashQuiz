@@ -7,6 +7,7 @@ import { quizUseCase } from "../../useCases/quiz/quiz-useCases";
 import { Visibility } from "../../domain/model/quiz.model";
 import { Flashcard } from "../../domain/model/flashcard.model";
 import { NotFoundError, NotLoggedError } from "../../erros/errors";
+import { QuizDTO } from "../../domain/dto/quiz.model.DTO";
 
 const flashCardSchema = z.object({
   term: z.string(),
@@ -18,6 +19,12 @@ const quizSchema = z.object({
   description: z.string().optional(),
   visibility: z.enum([Visibility.PUBLIC, Visibility.PRIVATE]),
   flashcardList: z.array(flashCardSchema).optional(),
+});
+
+const quizUpdateSchame = z.object({
+  title: z.string().optional(),
+  description: z.string().optional(),
+  visibility: z.enum([Visibility.PUBLIC, Visibility.PRIVATE]).optional(),
 });
 
 export const quizController = {
@@ -122,7 +129,7 @@ export const quizController = {
 
       const foundQuizById = await quizUseCase.findById(id);
 
-      if (!foundQuizById) throw new NotFoundError('quiz');
+      if (!foundQuizById) throw new NotFoundError("quiz");
 
       return response.status(200).json({
         sucess: true,
@@ -131,6 +138,42 @@ export const quizController = {
       });
     } catch (error) {
       console.error("quiz-controller.ts - findById", " :: Error ❌ : ", error);
+      next(error);
+    }
+  },
+
+  async update(
+    request: AuthenticatedRequest,
+    response: Response,
+    next: NextFunction,
+  ) {
+    try {
+      const userIdToken = request.userIdToken;
+      const userQuizRequest = request.body;
+      const { id } = request.params;
+
+      if (!userIdToken) throw new NotLoggedError();
+      const idSchema = z.string();
+      idSchema.parse(id);
+
+      const validatedQuizDate = quizUpdateSchame.parse(userQuizRequest);
+
+      const quizPartial: Partial<QuizDTO> = validatedQuizDate;
+
+      const userUpdated = await quizUseCase.update({
+        id: id,
+        quizData: quizPartial,
+      });
+
+      if (!userUpdated) throw new Error();
+
+      return response.status(200).json({
+        sucess: true,
+        data: userUpdated,
+        message: "Quiz atualizado com sucesso",
+      });
+    } catch (error) {
+      console.error("quiz-controller.ts - delete", " :: Error ❌ : ", error);
       next(error);
     }
   },

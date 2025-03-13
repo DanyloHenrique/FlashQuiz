@@ -1,3 +1,4 @@
+import { QuizDTO } from "../domain/dto/quiz.model.DTO";
 import { Quiz, Visibility } from "../domain/model/quiz.model";
 
 const quizzes: Quiz[] = [];
@@ -28,14 +29,32 @@ export const quizRepository = {
   },
 
   findById(quizId: String) {
-    const foundQuizById = quizzes.find((quiz) => quiz.id === quizId)
+    const foundQuizById = quizzes.find((quiz) => quiz.id === quizId);
 
-    if(!foundQuizById) return null
+    if (!foundQuizById) return null;
 
-     return {data: foundQuizById.toObject()}
+    return { data: foundQuizById.toObject() };
   },
-  update(quiz: Quiz) {
-    // return {data: updatedQuiz}
+  update({ id, quizData }: { id: string; quizData: Partial<QuizDTO> }) {
+    const quiz = quizzes.find((quiz) => quiz.id === id); // Busca pelo e-mail no array
+
+    if (!quiz) {
+      return null;
+    }
+
+    if (quizData.title !== undefined) {
+      quiz.setTitle(quizData.title);
+    }
+
+    if (quizData.description !== undefined) {
+      quiz.setDescription(quizData.description);
+    }
+
+    if (quizData.visibility !== undefined) {
+      quiz.setVisibility(quizData.visibility);
+    }
+
+    return { quiz: quiz.toObject() };
   },
   delete(quizId: string) {
     const quizIndexInQuizzes = quizzes.findIndex((quiz) => quiz.id === quizId);
