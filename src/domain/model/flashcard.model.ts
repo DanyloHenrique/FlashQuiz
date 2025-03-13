@@ -15,8 +15,11 @@ export class Flashcard {
   }
 
   public toObject() {
-    const { create_at, ...FlashcardWithoutDate } = this;
-    return FlashcardWithoutDate;
+    return {
+      id: this.id,
+      term: this.term,
+      description: this.description,
+    };
   }
 
   public getTerm() {

@@ -18,30 +18,52 @@ export class Quiz {
     Visibility.PUBLIC;
   readonly create_at: Date;
 
-  constructor({ userId, title, description, visibility, flashcardList }: QuizDTO) {
+  constructor({
+    userId,
+    title,
+    description,
+    visibility,
+    flashcardList = [],
+  }: QuizDTO) {
     this.userId = userId;
     this.id = uuid();
     this.title = title;
     this.description = description;
     this.create_at = new Date();
     this.visibility = visibility;
-    if (flashcardList) {
-      this.flashcardList = flashcardList.map((flashcard) => new Flashcard(flashcard));
-    }
+    this.flashcardList = flashcardList.map(
+      (flashcard) => new Flashcard(flashcard),
+    );
   }
-  public toObject() {
-    const { create_at, ...QuizWithoutDate } = this;
-    return {
-      QuizWithoutDate,
-      addFlashcard: (flashcard: Flashcard) => this.addFlashcard(flashcard),
+
+  public toObject(isIncludeFlashcards: boolean = false) {
+    const result: any = {
+      id: this.id,
+      userId: this.userId,
+      title: this.title,
+      description: this.description,
+      visibility: this.visibility,
+      flashcardList: [],
     };
+
+    if (isIncludeFlashcards) {
+      result.flashcardList = this.flashcardList.map((flashcard) =>
+        flashcard.toObject(),
+      );
+    }
+
+    return result;
   }
 
   public addFlashcard(flashcard: FlashcardDTO) {
-    const newFlashcardObj = new Flashcard(flashcard)
+    const newFlashcardObj = new Flashcard(flashcard);
     if (newFlashcardObj) {
       this.flashcardList.push(newFlashcardObj);
     }
+  }
+
+  public getFlashcardList() {
+    return this.flashcardList;
   }
 
   public getUserId() {
