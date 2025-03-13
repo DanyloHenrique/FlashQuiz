@@ -74,20 +74,20 @@ export const userUseCase = {
       if (!email || !password) throw new RequestDataMissingError();
       if (!SECRET) throw new Error();
 
-      const userFoundedByEmail = await userRepository.login({ email });
+      const userFoundedByEmail = await userRepository.getByEmail(email);
       if (!userFoundedByEmail) throw new EmailOrPasswordInvalidsError();
 
       const isPasswordValid = await bcrypt.compare(
         password,
-        userFoundedByEmail.user.getPassword,
+        userFoundedByEmail.user.getPassword(),
       );
 
       if (!isPasswordValid) throw new EmailOrPasswordInvalidsError();
 
       const token = generateToken(
-        userFoundedByEmail.user.getId,
-        userFoundedByEmail.user.getEmail,
-        userFoundedByEmail.user.getName,
+        userFoundedByEmail.user.getId(),
+        userFoundedByEmail.user.getEmail(),
+        userFoundedByEmail.user.getName(),
       );
 
       console.log("🚀 user-UseCase ~ token:", token);
@@ -111,14 +111,17 @@ export const userUseCase = {
 
       if (!name && !email && !password) throw new RequestDataMissingError();
 
+      const foundUserById = await userRepository.getById(id);
+      if (!foundUserById) throw new NotFoundError("user");
+
       //criptografa a senha se ela existir
       if (password) {
         password = await bcrypt.hash(password, 10);
       }
 
       const userUpdated = await userRepository.update({
-        id: id,
-        userData: { name, email, password },
+        userCurrentData: foundUserById.user,
+        userUpdateData: { name, email, password },
       });
 
       if (!userUpdated) throw new NotFoundError();
