@@ -10,8 +10,10 @@ import {
 import { User } from "../../domain/model/user.model";
 import { userRepository } from "../../repository/user-repository";
 import { UserDTO } from "../../domain/dto/user.model.DTO";
+import { generateToken } from "../../utils/authUtils";
 
 require("dotenv").config(); // Carrega as variáveis do .env
+const SECRET = process.env.SECRET;
 
 interface UserTokenPayload {
   userId: string;
@@ -19,121 +21,124 @@ interface UserTokenPayload {
   userName: string;
 }
 
-export async function userCreateUseCase(userData: UserDTO) {
-  try {
-    const { name, email, password } = userData;
+export const userUseCase = {
+  async create(userData: UserDTO) {
+    try {
+      const { name, email, password } = userData;
 
-    const userFoundedByEmail = userRepository.getByEmail(email);
+      const userFoundByEmail = userRepository.getByEmail(email);
+      if (userFoundByEmail) throw new EmailAlreadyUsedError();
 
-    if (userFoundedByEmail) throw new EmailAlreadyUsedError();
+      const userObj = new User({ name, email, password });
 
-    const userObj = new User({ name, email, password });
+      //criptografando a senha
+      const hashPassword = await bcrypt.hash(password, 10);
+      userObj.setPassword(hashPassword);
 
-    //criptografando a senha
-    const hashPassword = await bcrypt.hash(password, 10);
-    userObj.setPassword(hashPassword);
+      const userCreated = userRepository.create(userObj);
 
-    const userCreated = userRepository.create(userObj);
+      return userCreated;
+    } catch (error) {
+      console.log("🚀 useCase ~ create ~ error:", error);
+      throw error;
+    }
+  },
 
-    return userCreated;
-  } catch (error) {
-    throw error;
-  }
-}
+  async getByEmail(email: string) {
+    try {
+      if (!email) throw new RequestDataMissingError();
 
-export async function getUserByEmailUseCase(email: string) {
-  try {
-    const userFounded = userRepository.getByEmail(email);
-    if (!userFounded) throw new NotFoundError();
-    return userFounded;
-  } catch (error) {
-    throw error;
-  }
-}
+      const userFounded = userRepository.getByEmail(email);
+      if (!userFounded) throw new NotFoundError();
 
-export async function getAllUsersUseCase() {
-  try {
-    const usersList = userRepository.getAll();
+      return userFounded;
+    } catch (error) {
+      throw error;
+    }
+  },
 
-    if (!usersList) throw new NotFoundError();
+  async getAll() {
+    try {
+      const usersList = userRepository.getAll();
 
-    return usersList;
-  } catch (error) {
-    throw error;
-  }
-}
+      if (!usersList) throw new NotFoundError();
 
-export async function userLoginUseCase({
-  email,
-  password,
-}: {
-  email: string;
-  password: string;
-}) {
-  try {
-    const SECRET = process.env.SECRET || "DAKHFBAKFA4G51A8SDF14AS1F";
+      return usersList;
+    } catch (error) {
+      throw error;
+    }
+  },
 
-    const userFoundedByEmail = await userRepository.login({ email });
+  async Login({ email, password }: { email: string; password: string }) {
+    try {
+      if (!email || !password) throw new RequestDataMissingError();
+      if (!SECRET) throw new Error();
 
-    if (!userFoundedByEmail) throw new EmailOrPasswordInvalidsError();
+      const userFoundedByEmail = await userRepository.login({ email });
+      if (!userFoundedByEmail) throw new EmailOrPasswordInvalidsError();
 
-    const isPasswordValid = await bcrypt.compare(
-      password,
-      userFoundedByEmail.user.getPassword,
-    );
+      const isPasswordValid = await bcrypt.compare(
+        password,
+        userFoundedByEmail.user.getPassword,
+      );
 
-    if (!isPasswordValid) throw new EmailOrPasswordInvalidsError();
+      if (!isPasswordValid) throw new EmailOrPasswordInvalidsError();
 
-    const token = Jwt.sign(
-      {
-        userId: userFoundedByEmail.user.getId,
-        userEmail: userFoundedByEmail.user.getEmail,
-        userName: userFoundedByEmail.user.getName,
-      },
-      SECRET,
-      { expiresIn: 60 * 60 }, //1h
-    );
+      const token = generateToken(
+        userFoundedByEmail.user.getId,
+        userFoundedByEmail.user.getEmail,
+        userFoundedByEmail.user.getName,
+      );
 
-    console.log("🚀 user-UseCase ~ token:", token);
+      console.log("🚀 user-UseCase ~ token:", token);
 
-    return { token: token };
-  } catch (error) {
-    throw error;
-  }
-}
+      return { token: token };
+    } catch (error) {
+      throw error;
+    }
+  },
 
-//partial para tornar as propriedades como opcionais
-export async function userUpdateUseCase({
-  id,
-  userData,
-}: {
-  id: string;
-  userData: Partial<UserDTO>;
-}) {
-  try {
-    const { name, email, password } = userData;
+  async update({
+    id,
+    dataToUpdateUser,
+  }: {
+    id: string;
+    dataToUpdateUser: Partial<UserDTO>;
+  }) {
+    try {
+      const { name, email } = dataToUpdateUser;
+      let { password } = dataToUpdateUser;
 
-    if (!name && !email && !password) throw new RequestDataMissingError();
+      if (!name && !email && !password) throw new RequestDataMissingError();
 
-    const userUpdated = await userRepository.update({
-      id: id,
-      userData: { name, email, password },
-    });
+      //criptografa a senha se ela existir
+      if (password) {
+        password = await bcrypt.hash(password, 10);
+      }
 
-    if (!userUpdated) throw new NotFoundError();
+      const userUpdated = await userRepository.update({
+        id: id,
+        userData: { name, email, password },
+      });
 
-    return userUpdated;
-  } catch (error) {
-    throw error;
-  }
-}
+      if (!userUpdated) throw new NotFoundError();
 
-export async function userDeleteUseCase(id: string) {
-  try {
-    const userDelete = await userRepository.delete({ id });
-    if (!userDelete) throw new NotFoundError();
-    return { user: userDelete };
-  } catch (error) {
-    throw error;
-  }
-}
+      return userUpdated;
+    } catch (error) {
+      throw error;
+    }
+  },
+
+  async delete(id: string) {
+    try {
+      if (!id) throw new RequestDataMissingError();
+
+      const userDelete = await userRepository.delete({ id });
+      if (!userDelete) throw new NotFoundError();
+
+      return { user: userDelete };
+    } catch (error) {
+      throw error;
+    }
+  },
+};
