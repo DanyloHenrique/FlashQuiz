@@ -1,4 +1,4 @@
-import { Quiz } from "../domain/model/quiz.model";
+import { Quiz, Visibility } from "../domain/model/quiz.model";
 
 const quizzes: Quiz[] = [];
 
@@ -16,6 +16,15 @@ export const quizRepository = {
     if (!quizListFromUser) return null;
 
     return { data: quizListFromUser };
+  },
+
+  findAllPublicQuiz() {
+    const quizListPublic = quizzes.filter(
+      (quiz) => Visibility.PUBLIC === quiz.getVisibility(),
+    );
+    if (!quizListPublic) return null;
+
+    return { data: quizListPublic };
   },
 
   findById(id: string) {

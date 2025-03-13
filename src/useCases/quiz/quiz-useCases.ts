@@ -39,4 +39,12 @@ export const quizUseCase = {
 
     return findedAllQuizFromUser;
   },
+
+  async findAllPublic() {
+    const findedAllQuizFromUser = await quizRepository.findAllPublicQuiz();
+
+    if (!findedAllQuizFromUser) throw new NotFoundError();
+
+    return findedAllQuizFromUser;
+  },
 };

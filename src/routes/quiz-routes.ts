@@ -21,4 +21,12 @@ router.get(
     quizController.getAllFromUser(request, response, next);
   },
 );
+
+router.get(
+  "/quiz/public",
+  authenticateToken,
+  (request: Request, response: Response, next: NextFunction) => {
+    quizController.getAllPublic(request, response, next);
+  },
+);
 export default router;

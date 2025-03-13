@@ -81,4 +81,28 @@ export const quizController = {
       next(error);
     }
   },
+
+  async getAllPublic(
+    request: AuthenticatedRequest,
+    response: Response,
+    next: NextFunction,
+  ) {
+    try {
+      const userIdToken = request.userIdToken;
+      if (!userIdToken) throw new NotLoggedError();
+
+      const findedAllQuizPublic = await quizUseCase.findAllPublic();
+
+      if (!findedAllQuizPublic) throw new NotFoundError();
+
+      return response.status(200).json({
+        sucess: true,
+        data: findedAllQuizPublic,
+        message: "lista de Quiz públicos",
+      });
+    } catch (error) {
+      console.error("quiz-controller.ts", " :: Error ❌ : ", error);
+      next(error);
+    }
+  },
 };
