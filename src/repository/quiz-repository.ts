@@ -84,4 +84,18 @@ export const quizRepository = {
 
     return { quiz: quizObj.toObject(true) };
   },
+
+  async addMultipleFlashcardToQuiz({
+    quizObj,
+    newsFlashcard,
+  }: {
+    quizObj: Quiz;
+    newsFlashcard: FlashcardDTO[];
+  }) {
+    if (!quizObj || !newsFlashcard) return null;
+
+    newsFlashcard.forEach((flashcard) => quizObj.addFlashcard(flashcard));
+
+    return { quiz: quizObj.toObject(true) };
+  },
 };

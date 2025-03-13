@@ -126,20 +126,52 @@ export const quizUseCase = {
     quizId: String;
     flashcard: FlashcardDTO;
   }) {
-    if (!quizId || !flashcard) throw new RequestDataMissingError();
-    console.log("🚀 ~ quizId:", quizId);
-    console.log("🚀 ~ flashcard:", flashcard);
+    try {
+      if (!quizId || !flashcard) throw new RequestDataMissingError();
 
-    const foundQuizById = await quizRepository.findById(quizId);
-    if (!foundQuizById) throw new NotFoundError("quiz");
+      const foundQuizById = await quizRepository.findById(quizId);
+      if (!foundQuizById) throw new NotFoundError("quiz");
 
-    const createdFlashcard = await quizRepository.addFlashcardToQuiz({
-      quizObj: foundQuizById.quiz,
-      newFlashcard: flashcard,
-    });
+      const createdQuizFlashcard = await quizRepository.addFlashcardToQuiz({
+        quizObj: foundQuizById.quiz,
+        newFlashcard: flashcard,
+      });
 
-    if (!createdFlashcard) throw new NotFoundError("quiz");
+      if (!createdQuizFlashcard) throw new NotFoundError("quiz");
 
-    return createdFlashcard;
+      return createdQuizFlashcard;
+    } catch (error) {
+      console.error("quiz-useCases.ts", " :: Error ❌ : ", error);
+      throw error;
+    }
+  },
+
+  async addMultipleFlashcardToQuiz({
+    quizId,
+    flashcardList,
+  }: {
+    quizId: String;
+    flashcardList: FlashcardDTO[];
+  }) {
+    try {
+      if (!quizId || !flashcardList) throw new RequestDataMissingError();
+      console.log("🚀 ~ quizId:", quizId);
+      console.log("🚀 ~ flashcard:", flashcardList);
+
+      const foundQuizById = await quizRepository.findById(quizId);
+      if (!foundQuizById) throw new NotFoundError("quiz");
+
+      const createdQuizFlashcard = await quizRepository.addMultipleFlashcardToQuiz({
+        quizObj: foundQuizById.quiz,
+        newsFlashcard: flashcardList,
+      });
+
+      if (!createdQuizFlashcard) throw new NotFoundError("quiz");
+
+      return createdQuizFlashcard;
+    } catch (error) {
+      console.error("quiz-useCases.ts", " :: Error ❌ : ", error);
+      throw error;
+    }
   },
 };

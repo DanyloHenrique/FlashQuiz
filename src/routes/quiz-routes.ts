@@ -55,10 +55,18 @@ router.delete(
 );
 
 router.post(
-  "/quiz/:id",
+  "/quiz/:id/flashcard",
   authenticateToken,
   (request: Request, response: Response, next: NextFunction) => {
     quizController.addFlashcardToQuiz(request, response, next);
+  },
+);
+
+router.post(
+  "/quiz/:id/flashcard/bulk",
+  authenticateToken,
+  (request: Request, response: Response, next: NextFunction) => {
+    quizController.addMultipleFlashcardToQuiz(request, response, next);
   },
 );
 
