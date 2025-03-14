@@ -1,5 +1,3 @@
-import { cp } from "fs";
-import { StudySessionDTO } from "../domain/dto/studySession.model.DTO";
 import { Flashcard } from "../domain/model/flashcard.model";
 import { Status, StudySession } from "../domain/model/studySession.model";
 
