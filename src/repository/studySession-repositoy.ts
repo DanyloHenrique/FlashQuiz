@@ -22,7 +22,7 @@ export const studySessionRepository = {
     return { studySession: foundStudySessionById };
   },
 
-  updateStatus({
+  async updateStatus({
     statusUpdate,
     studySession,
   }: {
