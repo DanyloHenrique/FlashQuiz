@@ -70,7 +70,12 @@ export const studySessionUseCases = {
         throw new Error(
           "Sessão de estudo já completada, não é possível atualizar o status",
         );
+
       if (currentStatus === statusUpdate) throw new Error("Status iguais");
+
+      if (statusUpdate === Status.COMPLETED) {
+        return this.finishStudySession(studySessionId);
+      }
 
       const studySessionUpdated = await studySessionRepository.updateStatus({
         statusUpdate: statusUpdate,
@@ -100,6 +105,12 @@ export const studySessionUseCases = {
       if (!FoundStudySessionById) throw new NotFoundError("sessão de estudo");
 
       const studySession = FoundStudySessionById.studySession;
+
+      const isFinishStudySession = await studySessionRepository.isFinish(
+        FoundStudySessionById.studySession,
+      );
+      if (isFinishStudySession)
+        throw new Error("Sessão de estudo já completada");
 
       const flashcardAdd = studySession.getFlashcardUnique(flashcardAddID);
       if (!flashcardAdd) throw new NotFoundError("flashcard");
@@ -132,6 +143,12 @@ export const studySessionUseCases = {
 
       const studySession = FoundStudySessionById.studySession;
 
+      const isFinishStudySession = await studySessionRepository.isFinish(
+        studySession,
+      );
+      if (isFinishStudySession)
+        throw new Error("Sessão de estudo já completada");
+
       const FoundFlashcardViewLaterList =
         studySession.getFlashcardViewLaterList();
       if (FoundFlashcardViewLaterList.length === 0)
@@ -162,9 +179,10 @@ export const studySessionUseCases = {
       );
       if (!FoundStudySessionById) throw new NotFoundError("sessão de estudo");
 
-      const currentStatus = FoundStudySessionById.studySession.getStatus();
-
-      if (currentStatus === Status.COMPLETED)
+      const isFinishStudySession = await studySessionRepository.isFinish(
+        FoundStudySessionById.studySession,
+      );
+      if (isFinishStudySession)
         throw new Error("Sessão de estudo já completada");
 
       const finishedStudySession =
