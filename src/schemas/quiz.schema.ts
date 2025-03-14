@@ -7,6 +7,7 @@ const flashcardSchema = z.object({
 });
 
 const flashcardUpdateSchema = z.object({
+  flashcardId: z.string(),
   term: z.string().optional(),
   description: z.string().optional(),
 });
@@ -30,4 +31,10 @@ const arrayFlashcardList = z.object({
     .min(1, { message: "é necessário pelo menos 1 flashcard" }),
 });
 
-export { quizSchema, quizUpdateSchame, flashcardSchema, arrayFlashcardList, flashcardUpdateSchema };
+export {
+  quizSchema,
+  quizUpdateSchame,
+  flashcardSchema,
+  arrayFlashcardList,
+  flashcardUpdateSchema,
+};

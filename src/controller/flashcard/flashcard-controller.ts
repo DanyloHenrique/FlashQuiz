@@ -16,21 +16,22 @@ export const flashcardController = {
     try {
       const userIdToken = request.userIdToken;
       const flashcardRequest = request.body;
-      const { quizId, flashcardId } = request.params;
+      console.log("🚀 ~ flashcardRequest:", flashcardRequest);
+      const { quizId } = request.params;
 
       if (!userIdToken) throw new NotLoggedError();
       const idSchema = z.string();
       idSchema.parse(quizId);
-      idSchema.parse(flashcardId);
 
       const validatedFlashcardRequest =
         flashcardUpdateSchema.parse(flashcardRequest);
+      console.log("🚀 ~ validatedFlashcardRequest:", validatedFlashcardRequest);
 
       const flashcardPartial: Partial<FlashcardDTO> = validatedFlashcardRequest;
 
       const flashcardUpdated = await flashcardUseCase.update({
         quizId: quizId,
-        flashcardId: flashcardId,
+        flashcardId: validatedFlashcardRequest.flashcardId,
         dataFlashcardToUpdateData: flashcardPartial,
       });
 
@@ -58,7 +59,8 @@ export const flashcardController = {
   ) {
     try {
       const userIdToken = request.userIdToken;
-      const { quizId, flashcardId } = request.params;
+      const { quizId } = request.params;
+      const { flashcardId } = request.body;
       if (!userIdToken) throw new NotLoggedError();
 
       const idSchema = z.string();
