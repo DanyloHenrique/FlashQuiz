@@ -19,7 +19,9 @@ export const errorHandler = async (
 
   if (error instanceof AppError) {
     return response.status(error.statusCode).json({
+      sucess: false,
       message: error.message,
+      errors: error,
     });
   }
 

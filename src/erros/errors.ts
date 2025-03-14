@@ -9,7 +9,7 @@ export enum HttpStatus {
 export class AppError extends Error {
   public statusCode: number;
 
-  constructor(message: string, statusCode: HttpStatus) {
+  constructor(message: string, statusCode: HttpStatus = 500) {
     super(message);
     this.name = this.constructor.name;
     this.statusCode = statusCode;
