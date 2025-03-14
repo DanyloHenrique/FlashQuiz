@@ -73,4 +73,14 @@ export const studySessionRepository = {
 
     return { deletedFlashcar: deletedFlashcard.toObject() };
   },
+
+  async finishStudySession({ studySession }: { studySession: StudySession }) {
+    if (!studySession) return null;
+
+    studySession.setStatus(Status.COMPLETED);
+    studySession.setEndTime();
+    studySession.setTotalTime()
+
+    return { studySession: studySession.toObject() };
+  },
 };

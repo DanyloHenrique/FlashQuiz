@@ -49,4 +49,12 @@ router.delete(
     );
   },
 );
+
+router.put(
+  "/studySession/:studySessionId/finish",
+  authenticateToken,
+  (request: AuthenticatedRequest, response: Response, next: NextFunction) => {
+    studySessionController.finishStudySession(request, response, next);
+  },
+);
 export default router;

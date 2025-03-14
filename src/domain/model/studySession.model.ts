@@ -51,10 +51,6 @@ export class StudySession {
     };
   }
 
-  public setEndTime() {
-    return (this.endTime = new Date());
-  }
-
   public getFlashcardViewLaterList() {
     return this.flashcardViewLaterList;
   }
@@ -79,11 +75,16 @@ export class StudySession {
     this.flashcardViewLaterList = [...this.flashcardViewLaterList, flashcard];
   }
 
-  public setTotalTime(startTime: Date, endTime: Date) {
-    if (!startTime || !endTime) return null;
+  public setEndTime() {
+    return (this.endTime = new Date());
+  }
+
+  public setTotalTime() {
+    if (!this.startTime || !this.endTime) return null;
     const millisecondsForMinutes = 1000 * 60;
     this.totalTimeInMinutes =
-      (endTime.getTime() - startTime.getTime()) / millisecondsForMinutes;
+      (this.endTime.getTime() - this.startTime.getTime()) /
+      millisecondsForMinutes;
   }
 
   public setStatus(status: Status) {
