@@ -21,6 +21,10 @@ export const studySessionUseCases = {
 
       const flashcardList = foundQuizById.quiz.getFlashcardList();
       if (!flashcardList) throw new NotFoundError("lista de flashcards");
+      if (flashcardList.length === 0)
+        throw new AppError(
+          "Não é possível iniciar a sessão de estudo para um quiz sem flashcards",
+        );
 
       const studySessionObj = new StudySession({
         userId,
@@ -97,10 +101,10 @@ export const studySessionUseCases = {
 
   async addFlashcardToViewLater(
     studySessionId: string,
-    flashcardAddID: string,
+    flashcardAddId: string,
   ) {
     try {
-      if (!studySessionId || !flashcardAddID)
+      if (!studySessionId || !flashcardAddId)
         throw new RequestDataMissingError();
 
       const FoundStudySessionById = await studySessionRepository.getById(
@@ -116,7 +120,7 @@ export const studySessionUseCases = {
       if (isFinishStudySession)
         throw new AppError("Sessão de estudo já completada");
 
-      const flashcardAdd = studySession.getFlashcardUnique(flashcardAddID);
+      const flashcardAdd = studySession.getFlashcardUnique(flashcardAddId);
       if (!flashcardAdd) throw new NotFoundError("flashcard");
 
       const updatedFlashcardToViewList =

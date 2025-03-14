@@ -7,7 +7,7 @@ import { flashcardController } from "../controller/flashcard/flashcard-controlle
 const router = Router();
 
 router.put(
-  "/quiz/:quizId/flashcard/:flashcardId",
+  "/quiz/:quizId/flashcard/",
   authenticateToken,
   (request: AuthenticatedRequest, response: Response, next: NextFunction) => {
     flashcardController.update(request, response, next);
@@ -15,7 +15,7 @@ router.put(
 );
 
 router.delete(
-    "/quiz/:quizId/flashcard/:flashcardId",
+    "/quiz/:quizId/flashcard/",
     authenticateToken,
     (request: AuthenticatedRequest, response: Response, next: NextFunction) => {
       flashcardController.delete(request, response, next);
