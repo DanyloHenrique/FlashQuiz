@@ -152,4 +152,32 @@ export const studySessionUseCases = {
       throw error;
     }
   },
+
+  async finishStudySession(studySessionId: string) {
+    try {
+      if (!studySessionId) throw new RequestDataMissingError();
+
+      const FoundStudySessionById = await studySessionRepository.getById(
+        studySessionId,
+      );
+      if (!FoundStudySessionById) throw new NotFoundError("sessão de estudo");
+
+      const currentStatus = FoundStudySessionById.studySession.getStatus();
+
+      if (currentStatus === Status.COMPLETED)
+        throw new Error("Sessão de estudo já completada");
+
+      const finishedStudySession =
+        await studySessionRepository.finishStudySession({
+          studySession: FoundStudySessionById.studySession,
+        });
+
+      if (!finishedStudySession) throw new Error();
+
+      return finishedStudySession;
+    } catch (error) {
+      console.error("studySessionUseCases - getById - error: ", error);
+      throw error;
+    }
+  },
 };

@@ -187,4 +187,32 @@ export const studySessionController = {
       next(error);
     }
   },
+
+  async finishStudySession(
+    request: AuthenticatedRequest,
+    response: Response,
+    next: NextFunction,
+  ) {
+    try {
+      const userId = request.userIdToken;
+      const { studySessionId } = request.params;
+
+      if (!userId) throw new NotLoggedError();
+
+      const finishedStudySession = await studySessionUseCases.finishStudySession(
+        studySessionId,
+      );
+
+      if (!finishedStudySession) throw new Error();
+
+      return response.status(200).json({
+        sucess: true,
+        data: finishedStudySession,
+        message: "sessão de estudo completa",
+      });
+    } catch (error) {
+      console.error("studySessionController - finishStudySession: ", error);
+      next(error);
+    }
+  },
 };
