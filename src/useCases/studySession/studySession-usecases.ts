@@ -21,6 +21,11 @@ export const studySessionUseCases = {
 
       const flashcardList = foundQuizById.quiz.getFlashcardList();
       if (!flashcardList) throw new NotFoundError("lista de flashcards");
+      if (flashcardList.length === 0)
+        throw new AppError(
+          "Não é possível iniciar a sessão de estudo para um quiz sem flashcards",
+        );
+
 
       const studySessionObj = new StudySession({
         userId,
