@@ -67,6 +67,14 @@ export class StudySession {
     return this.status;
   }
 
+  public getFlashcardUnique(id: string) {
+    const flashcard = this.flashcardList.find(
+      (flashcard) => flashcard.id === id,
+    );
+
+    return flashcard;
+  }
+
   public setFlashcardViewLaterList(flashcard: Flashcard) {
     this.flashcardViewLaterList = [...this.flashcardViewLaterList, flashcard];
   }
