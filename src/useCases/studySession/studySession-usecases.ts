@@ -116,4 +116,40 @@ export const studySessionUseCases = {
       throw error;
     }
   },
+
+  async deleteFromFlashcardToViewLater(
+    studySessionId: string,
+    flashcardDeleteId: string,
+  ) {
+    try {
+      if (!studySessionId || !flashcardDeleteId)
+        throw new RequestDataMissingError();
+
+      const FoundStudySessionById = await studySessionRepository.getById(
+        studySessionId,
+      );
+      if (!FoundStudySessionById) throw new NotFoundError("sessão de estudo");
+
+      const studySession = FoundStudySessionById.studySession;
+
+      const FoundFlashcardViewLaterList =
+        studySession.getFlashcardViewLaterList();
+      if (FoundFlashcardViewLaterList.length === 0)
+        throw new Error("Nenhum flashcard na lista de ver depois");
+
+      const deletedFlashcardToViewList =
+        await studySessionRepository.deleteFlashcardToViewLater({
+          flashcardDeleteId: flashcardDeleteId,
+          flashcardViewLaterList: FoundFlashcardViewLaterList,
+        });
+
+      if (!deletedFlashcardToViewList)
+        throw new Error("Erro ao remover o flashcard da lista de ver depois");
+
+      return deletedFlashcardToViewList;
+    } catch (error) {
+      // console.error("studySessionUseCases - addFlashcardToViewList: ", error);
+      throw error;
+    }
+  },
 };
