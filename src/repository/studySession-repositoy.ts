@@ -1,5 +1,5 @@
 import { StudySessionDTO } from "../domain/dto/studySession.model.DTO";
-import { StudySession } from "../domain/model/studySession.model";
+import { Status, StudySession } from "../domain/model/studySession.model";
 
 const studySessionList: StudySession[] = [];
 
@@ -20,5 +20,19 @@ export const studySessionRepository = {
     if (!foundStudySessionById) return null;
 
     return { studySession: foundStudySessionById };
+  },
+
+  updateStatus({
+    statusUpdate,
+    studySession,
+  }: {
+    statusUpdate: Status;
+    studySession: StudySession;
+  }) {
+    if (!statusUpdate || !studySession) return null;
+
+    studySession.setStatus(statusUpdate);
+
+    return { studySession: studySession.toObject() };
   },
 };

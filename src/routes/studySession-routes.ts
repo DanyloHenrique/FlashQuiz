@@ -21,4 +21,12 @@ router.get(
     studySessionController.getById(request, response, next);
   },
 );
+
+router.put(
+  "/studySession/:studySessionId",
+  authenticateToken,
+  (request: AuthenticatedRequest, response: Response, next: NextFunction) => {
+    studySessionController.updateStatus(request, response, next);
+  },
+);
 export default router;

@@ -1,5 +1,5 @@
 import { StudySessionDTO } from "../../domain/dto/studySession.model.DTO";
-import { StudySession } from "../../domain/model/studySession.model";
+import { Status, StudySession } from "../../domain/model/studySession.model";
 import { NotFoundError, RequestDataMissingError } from "../../erros/errors";
 import { studySessionRepository } from "../../repository/studySession-repositoy";
 import { quizUseCase } from "../quiz/quiz-useCases";
@@ -41,12 +41,44 @@ export const studySessionUseCases = {
     try {
       if (!studySessionId) throw new RequestDataMissingError();
 
+      const FoundStudySessionById = await studySessionRepository.getById(
+        studySessionId,
+      );
 
-      const FoundStudySessionById = await studySessionRepository.getById(studySessionId);
-
-      if (!FoundStudySessionById) throw new NotFoundError('sessão de estudo');
+      if (!FoundStudySessionById) throw new NotFoundError("sessão de estudo");
 
       return FoundStudySessionById;
+    } catch (error) {
+      console.error("studySessionUseCases - getById - error: ", error);
+      throw error;
+    }
+  },
+
+  async updateStatus(studySessionId: string, statusUpdate: Status) {
+    try {
+      if (!studySessionId) throw new RequestDataMissingError();
+
+      const FoundStudySessionById = await studySessionRepository.getById(
+        studySessionId,
+      );
+      if (!FoundStudySessionById) throw new NotFoundError("sessão de estudo");
+
+      const currentStatus = FoundStudySessionById.studySession.getStatus();
+
+      if (currentStatus === Status.COMPLETED)
+        throw new Error(
+          "Sessão de estudo já completada, não é possível atualizar o status",
+        );
+      if (currentStatus === statusUpdate) throw new Error("Status iguais");
+
+      const studySessionUpdated = await studySessionRepository.updateStatus({
+        statusUpdate: statusUpdate,
+        studySession: FoundStudySessionById.studySession,
+      });
+
+      if (!studySessionUpdated) throw new Error();
+
+      return studySessionUpdated;
     } catch (error) {
       console.error("studySessionUseCases - getById - error: ", error);
       throw error;
