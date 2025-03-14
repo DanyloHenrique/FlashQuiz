@@ -50,4 +50,27 @@ export const studySessionRepository = {
 
     return { flashcardToViewList: studySession.getFlashcardViewLaterList() };
   },
+
+  async deleteFlashcardToViewLater({
+    flashcardDeleteId,
+    flashcardViewLaterList,
+  }: {
+    flashcardDeleteId: string;
+    flashcardViewLaterList: Flashcard[];
+  }) {
+    if (!flashcardDeleteId || !flashcardViewLaterList) return null;
+
+    const flashcardIndexInList = flashcardViewLaterList.findIndex(
+      (flashcard) => flashcard.id === flashcardDeleteId,
+    );
+
+    if (flashcardIndexInList === -1) return null;
+
+    const deletedFlashcard = flashcardViewLaterList.splice(
+      flashcardIndexInList,
+      1,
+    )[0];
+
+    return { deletedFlashcar: deletedFlashcard.toObject() };
+  },
 };

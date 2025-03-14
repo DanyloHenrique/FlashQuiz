@@ -148,4 +148,43 @@ export const studySessionController = {
       next(error);
     }
   },
+
+  async deleteFromFlashcardToViewLater(
+    request: AuthenticatedRequest,
+    response: Response,
+    next: NextFunction,
+  ) {
+    try {
+      const userId = request.userIdToken;
+      const { studySessionId } = request.params;
+      const { flashcardId } = request.body;
+      if (!userId) throw new NotLoggedError();
+
+      const addFLashcardSchema = z.object({
+        studySessionId: z.string(),
+        flashcardId: z.string(),
+      });
+      addFLashcardSchema.parse({ studySessionId, flashcardId });
+
+      const updatedFlashcardToViewList =
+        await studySessionUseCases.deleteFromFlashcardToViewLater(
+          studySessionId,
+          flashcardId,
+        );
+
+      if (!updatedFlashcardToViewList) throw new Error();
+
+      return response.status(200).json({
+        sucess: true,
+        data: updatedFlashcardToViewList,
+        message: "flashcard removido da lista de ver depois com sucesso",
+      });
+    } catch (error) {
+      console.error(
+        "studySessionController - deleteFromFlashcardToViewLater: ",
+        error,
+      );
+      next(error);
+    }
+  },
 };

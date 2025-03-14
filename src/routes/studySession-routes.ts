@@ -37,4 +37,16 @@ router.post(
     studySessionController.addFlashcardToViewLater(request, response, next);
   },
 );
+
+router.delete(
+  "/studySession/:studySessionId/flashcard/view-later",
+  authenticateToken,
+  (request: AuthenticatedRequest, response: Response, next: NextFunction) => {
+    studySessionController.deleteFromFlashcardToViewLater(
+      request,
+      response,
+      next,
+    );
+  },
+);
 export default router;
