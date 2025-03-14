@@ -1,4 +1,5 @@
 import { StudySessionDTO } from "../../domain/dto/studySession.model.DTO";
+import { Flashcard } from "../../domain/model/flashcard.model";
 import { Status, StudySession } from "../../domain/model/studySession.model";
 import { NotFoundError, RequestDataMissingError } from "../../erros/errors";
 import { studySessionRepository } from "../../repository/studySession-repositoy";
@@ -81,6 +82,37 @@ export const studySessionUseCases = {
       return studySessionUpdated;
     } catch (error) {
       console.error("studySessionUseCases - getById - error: ", error);
+      throw error;
+    }
+  },
+
+  async addFlashcardToViewLater(
+    studySessionId: string,
+    flashcardAddID: string,
+  ) {
+    try {
+      if (!studySessionId || !flashcardAddID)
+        throw new RequestDataMissingError();
+
+      const FoundStudySessionById = await studySessionRepository.getById(
+        studySessionId,
+      );
+      if (!FoundStudySessionById) throw new NotFoundError("sessão de estudo");
+
+      const studySession = FoundStudySessionById.studySession;
+
+      const flashcardAdd = studySession.getFlashcardUnique(flashcardAddID);
+      if (!flashcardAdd) throw new NotFoundError("flashcard");
+
+      const updatedFlashcardToViewList =
+        await studySessionRepository.addFlashcardToViewLater({
+          flashcardAdd: flashcardAdd,
+          studySession: studySession,
+        });
+
+      return updatedFlashcardToViewList;
+    } catch (error) {
+      console.error("studySessionUseCases - addFlashcardToViewList: ", error);
       throw error;
     }
   },
