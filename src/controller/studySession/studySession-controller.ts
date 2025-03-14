@@ -3,6 +3,7 @@ import { AuthenticatedRequest } from "../../middleware/authenticateToken";
 import { NotFoundError, NotLoggedError } from "../../erros/errors";
 import { studySessionUseCases } from "../../useCases/studySession/studySession-usecases";
 import { z } from "zod";
+import { Status } from "../../domain/model/studySession.model";
 
 export const studySessionController = {
   async create(
@@ -62,7 +63,52 @@ export const studySessionController = {
         message: "Sessão de estudo encontrada com sucesso!",
       });
     } catch (error) {
-      console.error("studySessionController - getById", " :: Error ❌ : ", error);
+      console.error(
+        "studySessionController - getById",
+        " :: Error ❌ : ",
+        error,
+      );
+      next(error);
+    }
+  },
+
+  async updateStatus(
+    request: AuthenticatedRequest,
+    response: Response,
+    next: NextFunction,
+  ) {
+    try {
+      const userId = request.userIdToken;
+      const { studySessionId } = request.params;
+      const { statusUpdate } = request.body;
+
+      if (!userId) throw new NotLoggedError();
+
+      const updateSchema = z.object({
+        studySessionId: z.string(),
+        statusUpdate: z.enum([
+          Status.PROGRESS,
+          Status.PAUSED,
+          Status.COMPLETED,
+        ]),
+      });
+
+      updateSchema.parse({ studySessionId, statusUpdate });
+
+      const updatedStatus = await studySessionUseCases.updateStatus(
+        studySessionId,
+        statusUpdate,
+      );
+
+      if (!updatedStatus) throw new Error();
+
+      return response.status(200).json({
+        sucess: true,
+        data: updatedStatus,
+        message: "Status atualizado com sucesso",
+      });
+    } catch (error) {
+      console.error("studySessionController - updateStatus: ", error);
       next(error);
     }
   },
