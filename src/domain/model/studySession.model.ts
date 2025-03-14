@@ -37,6 +37,20 @@ export class StudySession {
     this.endTime = null;
   }
 
+  public toObject() {
+    return {
+      id: this.id,
+      userId: this.userId,
+      quizId: this.quizId,
+      flashcardList: this.flashcardList,
+      flashcardViewLaterList: this.flashcardViewLaterList,
+      status: this.status,
+      totalTimeInMinutes: this.totalTimeInMinutes,
+      startTime: this.startTime,
+      endTime: this.endTime,
+    };
+  }
+
   public setEndTime() {
     return (this.endTime = new Date());
   }
