@@ -1,7 +1,11 @@
 import { StudySessionDTO } from "../../domain/dto/studySession.model.DTO";
 import { Flashcard } from "../../domain/model/flashcard.model";
 import { Status, StudySession } from "../../domain/model/studySession.model";
-import { NotFoundError, RequestDataMissingError } from "../../erros/errors";
+import {
+  AppError,
+  NotFoundError,
+  RequestDataMissingError,
+} from "../../erros/errors";
 import { studySessionRepository } from "../../repository/studySession-repositoy";
 import { quizUseCase } from "../quiz/quiz-useCases";
 
@@ -71,7 +75,7 @@ export const studySessionUseCases = {
           "Sessão de estudo já completada, não é possível atualizar o status",
         );
 
-      if (currentStatus === statusUpdate) throw new Error("Status iguais");
+      if (currentStatus === statusUpdate) throw new AppError("Status iguais");
 
       if (statusUpdate === Status.COMPLETED) {
         return this.finishStudySession(studySessionId);
@@ -110,7 +114,7 @@ export const studySessionUseCases = {
         FoundStudySessionById.studySession,
       );
       if (isFinishStudySession)
-        throw new Error("Sessão de estudo já completada");
+        throw new AppError("Sessão de estudo já completada");
 
       const flashcardAdd = studySession.getFlashcardUnique(flashcardAddID);
       if (!flashcardAdd) throw new NotFoundError("flashcard");
@@ -147,7 +151,7 @@ export const studySessionUseCases = {
         studySession,
       );
       if (isFinishStudySession)
-        throw new Error("Sessão de estudo já completada");
+        throw new AppError("Sessão de estudo já completada");
 
       const FoundFlashcardViewLaterList =
         studySession.getFlashcardViewLaterList();
@@ -183,7 +187,7 @@ export const studySessionUseCases = {
         FoundStudySessionById.studySession,
       );
       if (isFinishStudySession)
-        throw new Error("Sessão de estudo já completada");
+        throw new AppError("Sessão de estudo já completada");
 
       const finishedStudySession =
         await studySessionRepository.finishStudySession({
