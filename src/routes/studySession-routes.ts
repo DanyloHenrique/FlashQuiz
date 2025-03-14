@@ -29,4 +29,12 @@ router.put(
     studySessionController.updateStatus(request, response, next);
   },
 );
+
+router.post(
+  "/studySession/:studySessionId/flashcard/view-later",
+  authenticateToken,
+  (request: AuthenticatedRequest, response: Response, next: NextFunction) => {
+    studySessionController.addFlashcardToViewLater(request, response, next);
+  },
+);
 export default router;

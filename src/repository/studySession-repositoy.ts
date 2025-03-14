@@ -1,4 +1,5 @@
 import { StudySessionDTO } from "../domain/dto/studySession.model.DTO";
+import { Flashcard } from "../domain/model/flashcard.model";
 import { Status, StudySession } from "../domain/model/studySession.model";
 
 const studySessionList: StudySession[] = [];
@@ -34,5 +35,19 @@ export const studySessionRepository = {
     studySession.setStatus(statusUpdate);
 
     return { studySession: studySession.toObject() };
+  },
+
+  async addFlashcardToViewLater({
+    flashcardAdd,
+    studySession,
+  }: {
+    flashcardAdd: Flashcard;
+    studySession: StudySession;
+  }) {
+    if (!flashcardAdd || !studySession) return null;
+
+    studySession.setFlashcardViewLaterList(flashcardAdd);
+
+    return { flashcardToViewList: studySession.getFlashcardViewLaterList() };
   },
 };
