@@ -13,3 +13,80 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model User {
+  id           String         @id @default(uuid())
+  create_at    DateTime       @default(now())
+  name         String
+  email        String         @unique
+  password     String
+  quiz         Quiz[]
+  studySession StudySession[]
+}
+
+model Quiz {
+  id            String         @id @default(uuid())
+  userId        String
+  User          User           @relation(fields: [userId], references: [id])
+  title         String
+  description   String?
+  visibility    Visibility     @default(PUBLIC)
+  flashcardList Flashcard[]
+  create_at     DateTime       @default(now())
+  studySession  StudySession[]
+}
+
+model Flashcard {
+  id             String   @id @default(uuid())
+  Quiz           Quiz     @relation(fields: [quizId], references: [id], onDelete: Cascade)
+  quizId         String
+  term           String
+  description    String
+  create_at      DateTime @default(now())
+  studySessionId String?
+
+  StudySessionFlashcardViewLater ViewLaterFlashcard[]
+  StudySessionFlashcard          StudySessionFlashcard[]
+}
+
+model StudySession {
+  id                     String                  @id @default(uuid())
+  userId                 String
+  quizId                 String
+  user                   User                    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  quiz                   Quiz                    @relation(fields: [quizId], references: [id], onDelete: Cascade)
+  Status                 Status                  @default(PROGRESS)
+  totalTimeInMinutes     Int?
+  startTime              DateTime                @default(now())
+  endTime                DateTime?
+  StudySessionFlashcard  StudySessionFlashcard[]
+  flashcardViewLaterList ViewLaterFlashcard[]
+}
+
+model StudySessionFlashcard {
+  studySessionId String
+  flashcardId    String
+  studySession   StudySession @relation(fields: [studySessionId], references: [id], onDelete: Cascade)
+  flashcard      Flashcard    @relation(fields: [flashcardId], references: [id], onDelete: Cascade)
+
+  @@id([studySessionId, flashcardId]) // Chave composta
+}
+
+model ViewLaterFlashcard {
+  studySessionId String
+  flashcardId    String
+  studySession   StudySession @relation(fields: [studySessionId], references: [id], onDelete: Cascade)
+  flashcard      Flashcard    @relation(fields: [flashcardId], references: [id], onDelete: Cascade)
+
+  @@id([studySessionId, flashcardId]) // Chave composta
+}
+
+enum Visibility {
+  PUBLIC
+  PRIVATE
+}
+
+enum Status {
+  PROGRESS
+  COMPLETED
+  PAUSED
+}
