@@ -29,7 +29,7 @@ model Quiz {
   User          User           @relation(fields: [userId], references: [id])
   title         String
   description   String?
-  visibility    Visibility     @default(PUBLIC)
+  visibility    Visibility     @default(public)
   flashcardList Flashcard[]
   create_at     DateTime       @default(now())
   studySession  StudySession[]
@@ -54,7 +54,7 @@ model StudySession {
   quizId                 String
   user                   User                    @relation(fields: [userId], references: [id], onDelete: Cascade)
   quiz                   Quiz                    @relation(fields: [quizId], references: [id], onDelete: Cascade)
-  Status                 Status                  @default(PROGRESS)
+  status                 Status                  @default(progress)
   totalTimeInMinutes     Int?
   startTime              DateTime                @default(now())
   endTime                DateTime?
@@ -73,7 +73,7 @@ model StudySessionFlashcard {
 
 model ViewLaterFlashcard {
   studySessionId String
-  flashcardId    String
+  flashcardId    String 
   studySession   StudySession @relation(fields: [studySessionId], references: [id], onDelete: Cascade)
   flashcard      Flashcard    @relation(fields: [flashcardId], references: [id], onDelete: Cascade)
 
@@ -81,12 +81,12 @@ model ViewLaterFlashcard {
 }
 
 enum Visibility {
-  PUBLIC
-  PRIVATE
+  public
+  private
 }
 
 enum Status {
-  PROGRESS
-  COMPLETED
-  PAUSED
+  progress
+  completed
+  paused
 }
