@@ -25,8 +25,9 @@ export class StudySession {
     quizId,
     flashcardList,
     flashcardViewLaterList = [],
-  }: StudySessionDTO) {
-    this.id = uuid();
+    id
+  }: StudySessionDTO & { id?: string } ) {
+    this.id = id || uuid();
     this.userId = userId;
     this.quizId = quizId;
     this.flashcardList = flashcardList;

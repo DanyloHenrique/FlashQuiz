@@ -11,10 +11,10 @@ export class User {
   private quiz: Quiz[] = [];
   readonly date_at: Date;
 
-  constructor({ name, email, password }: UserDTO) {
+  constructor({ name, email, password, id }: UserDTO & { id?: string }) {
     if (!email.includes("@")) throw new Error("Email inválido");
 
-    this.id = uuid();
+    this.id = id || uuid();
     this.name = name;
     this.email = email;
     this.password = password;

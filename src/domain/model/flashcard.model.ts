@@ -7,8 +7,8 @@ export class Flashcard {
   private description: string;
   readonly create_at: Date;
 
-  constructor({ term, description }: FlashcardDTO) {
-    this.id = uuid();
+  constructor({ term, description, id }: FlashcardDTO & { id?: string }) {
+    this.id = id || uuid();
     this.term = term;
     this.description = description;
     this.create_at = new Date();

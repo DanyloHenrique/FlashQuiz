@@ -24,9 +24,10 @@ export class Quiz {
     description,
     visibility,
     flashcardList = [],
-  }: QuizDTO) {
+    id,
+  }: QuizDTO & { id?: string }) {
+    this.id = id || uuid();
     this.userId = userId;
-    this.id = uuid();
     this.title = title;
     this.description = description;
     this.create_at = new Date();
