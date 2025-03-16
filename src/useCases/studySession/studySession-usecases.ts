@@ -73,6 +73,7 @@ export const studySessionUseCases = {
       if (!FoundStudySessionById) throw new NotFoundError("sessão de estudo");
 
       const currentStatus = FoundStudySessionById.studySession.getStatus();
+      console.log("🚀 ~ updateStatus ~ currentStatus:", currentStatus);
 
       if (currentStatus === Status.COMPLETED)
         throw new Error(
@@ -117,6 +118,7 @@ export const studySessionUseCases = {
       const isFinishStudySession = await studySessionRepository.isFinish(
         FoundStudySessionById.studySession,
       );
+
       if (isFinishStudySession)
         throw new AppError("Sessão de estudo já completada");
 
@@ -165,7 +167,7 @@ export const studySessionUseCases = {
       const deletedFlashcardToViewList =
         await studySessionRepository.deleteFlashcardToViewLater({
           flashcardDeleteId: flashcardDeleteId,
-          flashcardViewLaterList: FoundFlashcardViewLaterList,
+          studySessionId: studySessionId,
         });
 
       if (!deletedFlashcardToViewList)

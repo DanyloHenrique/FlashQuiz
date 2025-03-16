@@ -6,4 +6,6 @@ export interface StudySessionDTO {
   quizId: string;
   flashcardList: Flashcard[];
   flashcardViewLaterList?: Flashcard[];
+  status?: Status;
+  startTime?: Date;
 }

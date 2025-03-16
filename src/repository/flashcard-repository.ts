@@ -1,10 +1,11 @@
 import { Flashcard } from "../domain/model/flashcard.model";
 import { FlashcardDTO } from "../domain/dto/flashcard.model.DTO";
+import prisma from "../lib/prismaClient";
 
 export const flashcards: Flashcard[] = [];
 
 export const flashcardRepository = {
-  update({
+  async update({
     flashcardCurrentData,
     flashcardToUpdateData,
   }: {
@@ -13,32 +14,49 @@ export const flashcardRepository = {
   }) {
     if (!flashcardCurrentData || !flashcardToUpdateData) return null;
 
-    if (flashcardToUpdateData.term !== undefined) {
-      flashcardCurrentData.setTerm(flashcardToUpdateData.term);
-    }
+    const flashcardUpdated = await prisma.flashcard.update({
+      where: {
+        id: flashcardCurrentData.id,
+      },
+      data: flashcardToUpdateData,
+      select: {
+        id: true,
+        quizId: true,
+        term: true,
+        description: true,
+      },
+    });
 
-    if (flashcardToUpdateData.description !== undefined) {
-      flashcardCurrentData.setDescription(flashcardToUpdateData.description);
-    }
+    const { id, quizId, description, term } = flashcardUpdated;
+    const flashcardObjResult = new Flashcard({ id, description, term });
 
-    return { flashcard: flashcardCurrentData.toObject() };
+    return { flashcard: flashcardObjResult };
   },
 
-  delete({
+  async delete({
     flashcardId,
     flashcardList,
   }: {
     flashcardId: string;
     flashcardList: Flashcard[];
   }) {
-    const flashcardIndexInList = flashcardList.findIndex(
-      (flashcard) => flashcard.id === flashcardId,
-    );
+    if (!flashcardId) return null;
 
-    if (flashcardIndexInList === -1) return null;
+    const flashcardDeleted = await prisma.flashcard.delete({
+      where: {
+        id: flashcardId,
+      },
+      select: {
+        id: true,
+        quizId: true,
+        term: true,
+        description: true,
+      },
+    });
 
-    const deletedFlashcard = flashcardList.splice(flashcardIndexInList, 1)[0];
+    const { id, quizId, description, term } = flashcardDeleted;
+    const flashcardObjResult = new Flashcard({ id, description, term });
 
-    return { flashcard: deletedFlashcard.toObject() };
+    return { flashcard: flashcardObjResult };
   },
 };
