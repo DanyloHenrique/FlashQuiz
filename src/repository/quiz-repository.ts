@@ -2,73 +2,187 @@ import { FlashcardDTO } from "../domain/dto/flashcard.model.DTO";
 import { QuizDTO } from "../domain/dto/quiz.model.DTO";
 import { Flashcard } from "../domain/model/flashcard.model";
 import { Quiz, Visibility } from "../domain/model/quiz.model";
+import { $Enums } from "@prisma/client";
+import prisma from "../lib/prismaClient";
 
 const quizzes: Quiz[] = [];
 
 export const quizRepository = {
-  create(quiz: Quiz) {
-    quizzes.push(quiz);
+  async create(quiz: Quiz) {
+    const quizCreated = await prisma.quiz.create({
+      data: {
+        id: quiz.id,
+        userId: quiz.userId,
+        title: quiz.getTitle(),
+        description: quiz.getDescription(),
+        create_at: quiz.create_at,
+        flashcardList: {
+          create: quiz.getFlashcardList().map((flashcard) => ({
+            term: flashcard.getTerm(),
+            description: flashcard.getDescription(),
+          })),
+        },
+        visibility: quiz ? quiz.getVisibility() : undefined,
+      },
+      include: { flashcardList: true },
+    });
 
-    return { quiz: quiz.toObject() };
+    const { userId, title, description, visibility, flashcardList, id } =
+      quizCreated;
+
+    const quizObjResult = new Quiz({
+      userId,
+      title,
+      description: description ?? undefined,
+      visibility: visibility as Visibility,
+      flashcardList,
+      id,
+    });
+
+    return { quiz: quizObjResult.toObject() };
   },
 
-  findAllFromUser(userId: string) {
-    const quizListFromUser = quizzes.filter((quiz) => userId == quiz.userId);
+  async findAllFromUser(userId: string) {
+    const foundQuizByUser = await prisma.quiz.findMany({
+      where: {
+        userId: userId,
+      },
+      include: { flashcardList: true },
+    });
 
-    if (quizListFromUser.length === 0) return null;
+    if (foundQuizByUser.length === 0) return null;
 
-    return { quiz: quizListFromUser.map((quiz) => quiz.toObject()) };
+    const listQuizObj: Quiz[] = foundQuizByUser.map((quiz) => {
+      const { userId, title, description, visibility, flashcardList, id } =
+        quiz;
+
+      return new Quiz({
+        userId,
+        title,
+        description: description ?? undefined,
+        visibility: visibility as Visibility,
+        flashcardList,
+        id,
+      });
+    });
+
+    return { quiz: listQuizObj.map((quiz) => quiz.toObject()) };
   },
 
-  findAllPublicQuiz() {
-    const quizListPublic = quizzes.filter(
-      (quiz) => Visibility.PUBLIC === quiz.getVisibility(),
-    );
-
+  async findAllPublicQuiz() {
+    const quizListPublic = await prisma.quiz.findMany({
+      where: {
+        visibility: Visibility.PUBLIC,
+      },
+      include: { flashcardList: true },
+    });
     if (quizListPublic.length === 0) return null;
 
-    return { quiz: quizListPublic.map((quiz) => quiz.toObject()) };
+    const listQuizObj: Quiz[] = quizListPublic.map((quiz) => {
+      const { userId, title, description, visibility, flashcardList, id } =
+        quiz;
+
+      return new Quiz({
+        userId,
+        title,
+        description: description ?? undefined,
+        visibility: visibility as Visibility,
+        flashcardList,
+        id,
+      });
+    });
+
+    return { quiz: listQuizObj.map((quiz) => quiz.toObject()) };
   },
 
-  findById(quizId: String) {
-    const foundQuizById = quizzes.find((quiz) => quiz.id === quizId);
-
+  async findById(quizId: string) {
+    const foundQuizById = await prisma.quiz.findUnique({
+      where: {
+        id: quizId,
+      },
+      include: { flashcardList: true },
+    });
     if (!foundQuizById) return null;
 
-    return { quiz: foundQuizById };
+    const { userId, title, description, visibility, flashcardList, id } =
+      foundQuizById;
+
+    const quizObjResult = new Quiz({
+      userId,
+      title,
+      description: description ?? undefined,
+      visibility: visibility as Visibility,
+      flashcardList,
+      id,
+    });
+    return { quiz: quizObjResult };
   },
 
-  update({
+  async update({
     dataCurrentQuiz,
     dataToUpdateQuiz,
   }: {
     dataCurrentQuiz: Quiz;
-    dataToUpdateQuiz: Partial<QuizDTO>;
+    dataToUpdateQuiz: {
+      title?: string;
+      description?: string;
+      visibility?: Visibility.PUBLIC | Visibility.PRIVATE;
+    };
   }) {
     if (!dataCurrentQuiz || !dataToUpdateQuiz) return null;
 
-    if (dataToUpdateQuiz.title !== undefined) {
-      dataCurrentQuiz.setTitle(dataToUpdateQuiz.title);
-    }
+    const quizUpdated = await prisma.quiz.update({
+      where: {
+        id: dataCurrentQuiz.id,
+      },
+      data: dataToUpdateQuiz,
+      include: {
+        flashcardList: true,
+      },
+    });
 
-    if (dataToUpdateQuiz.description !== undefined) {
-      dataCurrentQuiz.setDescription(dataToUpdateQuiz.description);
-    }
+    const { userId, title, description, visibility, flashcardList, id } =
+      quizUpdated;
 
-    if (dataToUpdateQuiz.visibility !== undefined) {
-      dataCurrentQuiz.setVisibility(dataToUpdateQuiz.visibility);
-    }
+    const quizObjResult = new Quiz({
+      userId,
+      title,
+      description: description ?? undefined,
+      visibility: visibility as Visibility,
+      flashcardList,
+      id,
+    });
 
-    return { quiz: dataCurrentQuiz.toObject() };
+    return { quiz: quizObjResult.toObject() };
   },
 
-  delete(quizId: string) {
-    const quizIndexInQuizzes = quizzes.findIndex((quiz) => quiz.id === quizId);
+  async delete(quizId: string) {
+    const deletedQuiz = await prisma.quiz.delete({
+      where: {
+        id: quizId,
+      },
+      select: {
+        id: true,
+        title: true,
+        description: true,
+        userId: true,
+        visibility: true,
+        flashcardList: true,
+      },
+    });
 
-    if (quizIndexInQuizzes === -1) return null;
+    const { userId, title, description, visibility, flashcardList, id } =
+      deletedQuiz;
 
-    const deletedQuiz = quizzes.splice(quizIndexInQuizzes, 1)[0];
-    return { quiz: deletedQuiz.toObject() };
+    const quizObjResult = new Quiz({
+      userId,
+      title,
+      description: description ?? undefined,
+      visibility: visibility as Visibility,
+      flashcardList,
+      id,
+    });
+    return { quiz: quizObjResult.toObject() };
   },
 
   async addFlashcardToQuiz({
@@ -80,9 +194,46 @@ export const quizRepository = {
   }) {
     if (!quizObj || !newFlashcard) return null;
 
-    quizObj.addFlashcard(newFlashcard);
+    const newFlashcardObj = new Flashcard(newFlashcard);
 
-    return { quiz: quizObj.toObject(true) };
+    await prisma.flashcard.create({
+      data: {
+        id: newFlashcardObj.id,
+        quizId: quizObj.id,
+        term: newFlashcardObj.getTerm(),
+        description: newFlashcardObj.getDescription(),
+        create_at: newFlashcardObj.create_at,
+      },
+      select: {
+        id: true,
+        quizId: true,
+        term: true,
+        description: true,
+      },
+    });
+
+    const foundQuizById = await prisma.quiz.findUnique({
+      where: {
+        id: quizObj.id,
+      },
+      include: { flashcardList: true },
+    });
+
+    if (!foundQuizById) return null;
+
+    const { userId, title, description, visibility, flashcardList, id } =
+      foundQuizById;
+
+    const quizObjResult = new Quiz({
+      userId,
+      title,
+      description: description ?? undefined,
+      visibility: visibility as Visibility,
+      flashcardList,
+      id,
+    });
+
+    return { quiz: quizObjResult.toObject(true) };
   },
 
   async addMultipleFlashcardToQuiz({
@@ -94,8 +245,46 @@ export const quizRepository = {
   }) {
     if (!quizObj || !newsFlashcard) return null;
 
-    newsFlashcard.forEach((flashcard) => quizObj.addFlashcard(flashcard));
+    const flashcardObjList = newsFlashcard.map((flashcard) => {
+      const { term, description } = flashcard;
+      return new Flashcard({ term, description });
+    });
 
-    return { quiz: quizObj.toObject(true) };
+    const flashcardCreateList = flashcardObjList.map((flashcard) => ({
+      term: flashcard.getTerm(),
+      description: flashcard.getDescription(),
+      quizId: quizObj.id,
+      create_at: flashcard.create_at,
+    }));
+
+    await prisma.flashcard.createMany({
+      data: flashcardCreateList,
+      skipDuplicates: true,
+    });
+
+    const foundQuizById = await prisma.quiz.findUnique({
+      where: {
+        id: quizObj.id,
+      },
+      include: { flashcardList: true },
+    });
+
+    if (!foundQuizById) return null;
+
+    const { userId, title, description, visibility, flashcardList, id } =
+      foundQuizById;
+
+    const quizObjResult = new Quiz({
+      userId,
+      title,
+      description: description ?? undefined,
+      visibility: visibility as Visibility,
+      flashcardList,
+      id,
+    });
+
+    if (!quizObjResult) return null;
+
+    return { quiz: quizObjResult.toObject(true) };
   },
 };

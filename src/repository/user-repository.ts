@@ -1,40 +1,77 @@
 import { User } from "../domain/model/user.model";
-
-const users: User[] = [];
+import prisma from "../lib/prismaClient";
 
 export const userRepository = {
-  create(userData: User) {
-    users.push(userData);
-    //prisma
+  async create(userData: User) {
+    const userCreated = await prisma.user.create({
+      data: {
+        id: userData.id,
+        name: userData.getName(),
+        email: userData.getEmail(),
+        password: userData.getPassword(),
+        create_at: userData.date_at,
+      },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        password: true,
+      },
+    });
 
-    return { user: userData.toObject() };
+    if (!userCreated) return null;
+    const userObjResult = new User(userCreated);
+
+    return { user: userObjResult.toObject() };
   },
 
-  getByEmail(email: string) {
-    const foundUserByEmail = users.find((user) => user.getEmail() === email); // Busca pelo e-mail no array
+  async getByEmail(email: string) {
+    const foundUserByEmail = await prisma.user.findUnique({
+      where: { email: email },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        password: true,
+      },
+    });
 
     if (!foundUserByEmail) {
       return null;
     }
-    return { user: foundUserByEmail };
+
+    const userObjResult = new User(foundUserByEmail);
+
+    return { user: userObjResult };
   },
 
-  getById(id: string) {
-    const foundUser = users.find((user) => user.getId() === id); // Busca pelo e-mail no array
+  async getById(id: string) {
+    const foundUserById = await prisma.user.findUnique({
+      where: { id: id },
+    });
+    if (!foundUserById) return null;
 
-    if (!foundUser) return null;
+    const userObjResult = new User(foundUserById);
 
-    return { user: foundUser };
+    return { user: userObjResult };
   },
 
-  getAll() {
-    if (!users) {
-      return null;
-    }
-    return { users: users.map((user) => user.toObject()) }; // Retorna todos os usuários
+  async getAll() {
+    const foundAllUsers = await prisma.user.findMany({
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        password: true,
+      },
+    });
+
+    const listUserObj = foundAllUsers.map((user) => new User(user));
+
+    return { users: listUserObj.map((user) => user.toObject()) }; // Retorna todos os usuários
   },
 
-  update({
+  async update({
     userCurrentData,
     userUpdateData,
   }: {
@@ -43,29 +80,39 @@ export const userRepository = {
   }) {
     if (!userCurrentData) return null;
 
-    if (userUpdateData.name !== undefined) {
-      userCurrentData.setName(userUpdateData.name);
-    }
+    const userUpdated = await prisma.user.update({
+      where: {
+        id: userCurrentData.id,
+      },
+      data: userUpdateData,
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        password: true,
+      },
+    });
 
-    if (userUpdateData.email !== undefined) {
-      userCurrentData.setEmail(userUpdateData.email);
-    }
+    const userObjResult = new User(userUpdated);
 
-    if (userUpdateData.password !== undefined) {
-      userCurrentData.setPassword(userUpdateData.password);
-    }
-
-    return { user: userCurrentData.toObject() };
+    return { user: userObjResult.toObject() };
   },
 
-  delete({ id }: { id: string }) {
-    const userIndexInUsers = users.findIndex((user) => user.getId() === id);
+  async delete({ id }: { id: string }) {
+    const deleteUser = await prisma.user.delete({
+      where: {
+        id: id,
+      },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        password: true,
+      },
+    });
 
-    if (userIndexInUsers === -1) {
-      return null;
-    }
+    const userObjResult = new User(deleteUser);
 
-    const deletedUser = users.splice(userIndexInUsers, 1)[0];
-    return { user: deletedUser.toObject() };
+    return { user: userObjResult.toObject() };
   },
 };

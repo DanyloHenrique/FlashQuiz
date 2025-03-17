@@ -24,18 +24,48 @@ export class StudySession {
     userId,
     quizId,
     flashcardList,
-    flashcardViewLaterList = [],
-    id
-  }: StudySessionDTO & { id?: string } ) {
-    this.id = id || uuid();
+    flashcardViewLaterList,
+    status,
+    startTime,
+    id,
+  }: StudySessionDTO & { id?: string }) {
+    this.id = id ?? uuid();
     this.userId = userId;
     this.quizId = quizId;
     this.flashcardList = flashcardList;
-    this.flashcardViewLaterList = flashcardViewLaterList;
-    this.status = Status.PROGRESS;
+    this.flashcardViewLaterList = flashcardViewLaterList ?? [];
+    this.status = status ?? Status.PROGRESS;
     this.totalTimeInMinutes = 0;
-    this.startTime = new Date();
+    this.startTime = startTime ?? new Date();
     this.endTime = null;
+  }
+
+  static fromPrisma(raw: any): StudySession {
+    return new StudySession({
+      id: raw.id,
+      userId: raw.userId,
+      quizId: raw.quizId,
+      status: raw.status,
+      startTime: raw.startTime,
+      flashcardList: raw.StudySessionFlashcard.map(
+        (sessionFlashcard: any) =>
+          new Flashcard({
+            id: sessionFlashcard.flashcard.id,
+            term: sessionFlashcard.flashcard.term,
+            description: sessionFlashcard.flashcard.description,
+            create_at: sessionFlashcard.flashcard.create_at,
+          }),
+      ),
+      flashcardViewLaterList: (raw.flashcardViewLaterList ?? []).map(
+        (sessionFlashcard: any) =>
+          new Flashcard({
+            id: sessionFlashcard.flashcard.id,
+            term: sessionFlashcard.flashcard.term,
+            description: sessionFlashcard.flashcard.description,
+            create_at: sessionFlashcard.flashcard.create_at,
+          }),
+      ),
+    });
   }
 
   public toObject() {
@@ -50,6 +80,14 @@ export class StudySession {
       startTime: this.startTime,
       endTime: this.endTime,
     };
+  }
+
+  public isFinish(): boolean {
+    return this.status === Status.COMPLETED;
+  }
+  
+  public getFlashcardList() {
+    return this.flashcardList;
   }
 
   public getFlashcardViewLaterList() {
@@ -76,11 +114,15 @@ export class StudySession {
     this.flashcardViewLaterList = [...this.flashcardViewLaterList, flashcard];
   }
 
-  public setEndTime() {
-    return (this.endTime = new Date());
+  public setEndTime(endTimeParam?: Date) {
+    this.endTime = endTimeParam || new Date();
   }
 
-  public setTotalTime() {
+  public setTotalTime(totalTimeParam?: number) {
+    if (totalTimeParam) {
+      this.totalTimeInMinutes = totalTimeParam;
+    }
+
     if (!this.startTime || !this.endTime) return null;
     const millisecondsForMinutes = 1000 * 60;
     this.totalTimeInMinutes =

@@ -26,7 +26,7 @@ export const userUseCase = {
     try {
       const { name, email, password } = userData;
 
-      const userFoundByEmail = userRepository.getByEmail(email);
+      const userFoundByEmail = await userRepository.getByEmail(email);
       if (userFoundByEmail) throw new EmailAlreadyUsedError();
 
       const userObj = new User({ name, email, password });
@@ -48,7 +48,7 @@ export const userUseCase = {
     try {
       if (!email) throw new RequestDataMissingError();
 
-      const userFounded = userRepository.getByEmail(email);
+      const userFounded = await userRepository.getByEmail(email);
       if (!userFounded) throw new NotFoundError();
 
       return userFounded;
@@ -59,7 +59,7 @@ export const userUseCase = {
 
   async getAll() {
     try {
-      const usersList = userRepository.getAll();
+      const usersList = await userRepository.getAll();
 
       if (!usersList) throw new NotFoundError();
 

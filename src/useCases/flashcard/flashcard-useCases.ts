@@ -17,6 +17,7 @@ export const flashcardUseCase = {
       if (!quizId || !flashcardId || !dataFlashcardToUpdateData) {
         throw new RequestDataMissingError();
       }
+      const { term, description } = dataFlashcardToUpdateData;
 
       const foundQuizById = await quizRepository.findById(quizId);
       if (!foundQuizById) throw new NotFoundError("quiz");
@@ -31,7 +32,7 @@ export const flashcardUseCase = {
 
       const flashcardUpdated = await flashcardRepository.update({
         flashcardCurrentData: flashcard,
-        flashcardToUpdateData: dataFlashcardToUpdateData,
+        flashcardToUpdateData: { term, description },
       });
 
       if (!flashcardUpdated) throw new Error();
@@ -53,7 +54,7 @@ export const flashcardUseCase = {
       if (!quizId || !flashcardId) {
         throw new RequestDataMissingError();
       }
-      console.log("🚀 ~ quizId:", quizId)
+      console.log("🚀 ~ quizId:", quizId);
 
       const foundQuizById = await quizRepository.findById(quizId);
       if (!foundQuizById) throw new NotFoundError("quiz");

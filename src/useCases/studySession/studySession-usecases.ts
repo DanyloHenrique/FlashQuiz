@@ -1,5 +1,4 @@
 import { StudySessionDTO } from "../../domain/dto/studySession.model.DTO";
-import { Flashcard } from "../../domain/model/flashcard.model";
 import { Status, StudySession } from "../../domain/model/studySession.model";
 import {
   AppError,
@@ -73,7 +72,7 @@ export const studySessionUseCases = {
       if (!FoundStudySessionById) throw new NotFoundError("sessão de estudo");
 
       const currentStatus = FoundStudySessionById.studySession.getStatus();
-
+      
       if (currentStatus === Status.COMPLETED)
         throw new Error(
           "Sessão de estudo já completada, não é possível atualizar o status",
@@ -114,11 +113,8 @@ export const studySessionUseCases = {
 
       const studySession = FoundStudySessionById.studySession;
 
-      const isFinishStudySession = await studySessionRepository.isFinish(
-        FoundStudySessionById.studySession,
-      );
-      if (isFinishStudySession)
-        throw new AppError("Sessão de estudo já completada");
+      const isFinish = studySession.isFinish();
+      if (isFinish) throw new AppError("Sessão de estudo já completada");
 
       const flashcardAdd = studySession.getFlashcardUnique(flashcardAddId);
       if (!flashcardAdd) throw new NotFoundError("flashcard");
@@ -151,11 +147,8 @@ export const studySessionUseCases = {
 
       const studySession = FoundStudySessionById.studySession;
 
-      const isFinishStudySession = await studySessionRepository.isFinish(
-        studySession,
-      );
-      if (isFinishStudySession)
-        throw new AppError("Sessão de estudo já completada");
+      const isFinish = studySession.isFinish();
+      if (isFinish) throw new AppError("Sessão de estudo já completada");
 
       const FoundFlashcardViewLaterList =
         studySession.getFlashcardViewLaterList();
@@ -165,7 +158,7 @@ export const studySessionUseCases = {
       const deletedFlashcardToViewList =
         await studySessionRepository.deleteFlashcardToViewLater({
           flashcardDeleteId: flashcardDeleteId,
-          flashcardViewLaterList: FoundFlashcardViewLaterList,
+          studySessionId: studySessionId,
         });
 
       if (!deletedFlashcardToViewList)
@@ -186,16 +179,14 @@ export const studySessionUseCases = {
         studySessionId,
       );
       if (!FoundStudySessionById) throw new NotFoundError("sessão de estudo");
+      const studySession = FoundStudySessionById.studySession;
 
-      const isFinishStudySession = await studySessionRepository.isFinish(
-        FoundStudySessionById.studySession,
-      );
-      if (isFinishStudySession)
-        throw new AppError("Sessão de estudo já completada");
+      const isFinish = studySession.isFinish();
+      if (isFinish) throw new AppError("Sessão de estudo já completada");
 
       const finishedStudySession =
         await studySessionRepository.finishStudySession({
-          studySession: FoundStudySessionById.studySession,
+          studySession: studySession,
         });
 
       if (!finishedStudySession) throw new Error();

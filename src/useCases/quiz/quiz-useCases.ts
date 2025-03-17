@@ -52,7 +52,7 @@ export const quizUseCase = {
     return findedAllQuizFromUser;
   },
 
-  async findById(quizId: String) {
+  async findById(quizId: string) {
     try {
       if (!quizId) throw new RequestDataMissingError();
 
@@ -117,7 +117,7 @@ export const quizUseCase = {
     quizId,
     flashcard,
   }: {
-    quizId: String;
+    quizId: string;
     flashcard: FlashcardDTO;
   }) {
     try {
@@ -144,7 +144,7 @@ export const quizUseCase = {
     quizId,
     flashcardList,
   }: {
-    quizId: String;
+    quizId: string;
     flashcardList: FlashcardDTO[];
   }) {
     try {
