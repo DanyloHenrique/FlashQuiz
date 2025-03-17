@@ -2,8 +2,6 @@ import { Flashcard } from "../domain/model/flashcard.model";
 import { Status, StudySession } from "../domain/model/studySession.model";
 import prisma from "../lib/prismaClient";
 
-const studySessionList: StudySession[] = [];
-
 export const studySessionRepository = {
   async create(studySession: StudySession) {
     if (!studySession) return null;
@@ -40,12 +38,14 @@ export const studySessionRepository = {
         }),
     );
 
-    const studyObjResult = new StudySession({
-      id,
-      quizId,
-      userId,
-      flashcardList: flashcardList,
-    });
+    // const studyObjResult = new StudySession({
+    //   id,
+    //   quizId,
+    //   userId,
+    //   flashcardList: flashcardList,
+    // });
+
+    const studyObjResult = StudySession.fromPrisma(studySessionCreated);
 
     return { studySession: studyObjResult.toObject() };
   },
@@ -67,39 +67,7 @@ export const studySessionRepository = {
 
     if (!foundStudySession) return null;
 
-    const {
-      id,
-      quizId,
-      userId,
-      StudySessionFlashcard,
-      status,
-      flashcardViewLaterList,
-    } = foundStudySession;
-    const flashcardList = StudySessionFlashcard.map(
-      (sessionFlashcard) =>
-        new Flashcard({
-          id: sessionFlashcard.flashcard.id,
-          term: sessionFlashcard.flashcard.term,
-          description: sessionFlashcard.flashcard.description,
-        }),
-    );
-    const flashcardViewLater = flashcardViewLaterList.map(
-      (sessionFlashcard) =>
-        new Flashcard({
-          id: sessionFlashcard.flashcard.id,
-          term: sessionFlashcard.flashcard.term,
-          description: sessionFlashcard.flashcard.description,
-        }),
-    );
-
-    const studyObjResult = new StudySession({
-      id,
-      quizId,
-      userId,
-      flashcardList: flashcardList,
-      status: status as Status,
-      flashcardViewLaterList: flashcardViewLater,
-    });
+    const studyObjResult = StudySession.fromPrisma(foundStudySession);
 
     return { studySession: studyObjResult };
   },
@@ -175,57 +143,10 @@ export const studySessionRepository = {
       },
     });
 
-    const foundStudySession = await prisma.studySession.findUnique({
-      where: { id: studySession.id },
-      include: {
-        StudySessionFlashcard: {
-          include: { flashcard: true },
-        },
-        flashcardViewLaterList: {
-          include: { flashcard: true },
-        },
-      },
-    });
-
+    if (!addedViewLater) return null;
     studySession.setFlashcardViewLaterList(flashcardAdd);
 
-    if (!foundStudySession) return null;
-
-    const {
-      id,
-      quizId,
-      userId,
-      StudySessionFlashcard,
-      flashcardViewLaterList,
-    } = foundStudySession;
-
-    const flashcardList = StudySessionFlashcard.map(
-      (sessionFlashcard) =>
-        new Flashcard({
-          id: sessionFlashcard.flashcard.id,
-          term: sessionFlashcard.flashcard.term,
-          description: sessionFlashcard.flashcard.description,
-        }),
-    );
-
-    const flashcardViewLater = flashcardViewLaterList.map(
-      (sessionFlashcard) =>
-        new Flashcard({
-          id: sessionFlashcard.flashcard.id,
-          term: sessionFlashcard.flashcard.term,
-          description: sessionFlashcard.flashcard.description,
-        }),
-    );
-
-    const studyObjResult = new StudySession({
-      id,
-      quizId,
-      userId,
-      flashcardList: flashcardList,
-      flashcardViewLaterList: flashcardViewLater,
-    });
-
-    return { flashcardToViewList: studyObjResult.getFlashcardViewLaterList() };
+    return { flashcardToViewList: studySession.getFlashcardViewLaterList() };
   },
 
   async deleteFlashcardToViewLater({
@@ -259,6 +180,7 @@ export const studySessionRepository = {
         description: true,
       },
     });
+
     if (!flashcardDeletedFound) return null;
     const { id, term, description } = flashcardDeletedFound;
     const flashcardObjResult = new Flashcard({ id, term, description });
@@ -294,15 +216,5 @@ export const studySessionRepository = {
     studySession.setTotalTime(totalTimeInMinutes || undefined);
 
     return { studySession: studySession.toObject() };
-  },
-
-  async isFinish(studySession: StudySession) {
-    if (!studySession) return null;
-
-    if (studySession.getStatus() === Status.COMPLETED) {
-      return true;
-    } else {
-      return false;
-    }
   },
 };

@@ -53,14 +53,16 @@ export class StudySession {
             id: sessionFlashcard.flashcard.id,
             term: sessionFlashcard.flashcard.term,
             description: sessionFlashcard.flashcard.description,
+            create_at: sessionFlashcard.flashcard.create_at,
           }),
       ),
-      flashcardViewLaterList: raw.flashcardViewLaterList.map(
+      flashcardViewLaterList: (raw.flashcardViewLaterList ?? []).map(
         (sessionFlashcard: any) =>
           new Flashcard({
             id: sessionFlashcard.flashcard.id,
             term: sessionFlashcard.flashcard.term,
             description: sessionFlashcard.flashcard.description,
+            create_at: sessionFlashcard.flashcard.create_at,
           }),
       ),
     });
@@ -80,6 +82,10 @@ export class StudySession {
     };
   }
 
+  public isFinish(): boolean {
+    return this.status === Status.COMPLETED;
+  }
+  
   public getFlashcardList() {
     return this.flashcardList;
   }
